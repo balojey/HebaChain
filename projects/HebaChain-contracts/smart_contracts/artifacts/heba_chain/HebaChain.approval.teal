@@ -1,6 +1,11 @@
 #pragma version 10
 
 smart_contracts.heba_chain.contract.HebaChain.approval_program:
+    txn ApplicationID
+    bnz main_entrypoint@2
+    callsub __init__
+
+main_entrypoint@2:
     callsub __puya_arc4_router__
     return
 
@@ -9,22 +14,95 @@ smart_contracts.heba_chain.contract.HebaChain.approval_program:
 __puya_arc4_router__:
     proto 0 1
     txn NumAppArgs
-    bz __puya_arc4_router___bare_routing@5
-    method "hello(string)string"
+    bz __puya_arc4_router___bare_routing@10
+    method "add_product(string,address,address,string,string,string)void"
+    method "ship_product(uint64,string,string,uint64)void"
+    method "alter_product(uint64,string,string)void"
+    method "deliver_product(uint64,string)void"
+    method "get_product_history(uint64)(uint64,string,string,uint64)"
+    method "get_products()byte[]"
     txna ApplicationArgs 0
-    match __puya_arc4_router___hello_route@2
+    match __puya_arc4_router___add_product_route@2 __puya_arc4_router___ship_product_route@3 __puya_arc4_router___alter_product_route@4 __puya_arc4_router___deliver_product_route@5 __puya_arc4_router___get_product_history_route@6 __puya_arc4_router___get_products_route@7
     int 0
     retsub
 
-__puya_arc4_router___hello_route@2:
+__puya_arc4_router___add_product_route@2:
     txn OnCompletion
     !
     assert // OnCompletion is NoOp
     txn ApplicationID
     assert // is not creating
     txna ApplicationArgs 1
-    extract 2 0
-    callsub hello
+    txna ApplicationArgs 2
+    txna ApplicationArgs 3
+    txna ApplicationArgs 4
+    txna ApplicationArgs 5
+    txna ApplicationArgs 6
+    callsub add_product
+    int 1
+    retsub
+
+__puya_arc4_router___ship_product_route@3:
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    txna ApplicationArgs 1
+    txna ApplicationArgs 2
+    txna ApplicationArgs 3
+    txna ApplicationArgs 4
+    callsub ship_product
+    int 1
+    retsub
+
+__puya_arc4_router___alter_product_route@4:
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    txna ApplicationArgs 1
+    txna ApplicationArgs 2
+    txna ApplicationArgs 3
+    callsub alter_product
+    int 1
+    retsub
+
+__puya_arc4_router___deliver_product_route@5:
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    txna ApplicationArgs 1
+    txna ApplicationArgs 2
+    callsub deliver_product
+    int 1
+    retsub
+
+__puya_arc4_router___get_product_history_route@6:
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    txna ApplicationArgs 1
+    callsub get_product_history
+    byte 0x151f7c75
+    swap
+    concat
+    log
+    int 1
+    retsub
+
+__puya_arc4_router___get_products_route@7:
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    callsub get_products
     dup
     len
     itob
@@ -38,24 +116,990 @@ __puya_arc4_router___hello_route@2:
     int 1
     retsub
 
-__puya_arc4_router___bare_routing@5:
+__puya_arc4_router___bare_routing@10:
     txn OnCompletion
-    bnz __puya_arc4_router___after_if_else@9
+    bnz __puya_arc4_router___after_if_else@14
     txn ApplicationID
     !
     assert // is creating
     int 1
     retsub
 
-__puya_arc4_router___after_if_else@9:
+__puya_arc4_router___after_if_else@14:
     int 0
     retsub
 
 
-// smart_contracts.heba_chain.contract.HebaChain.hello(name: bytes) -> bytes:
-hello:
-    proto 1 1
-    byte "Hello, "
+// smart_contracts.heba_chain.contract.HebaChain.add_product(name: bytes, customer: bytes, intermediary: bytes, condition: bytes, current_location: bytes, delivery_location: bytes) -> void:
+add_product:
+    proto 6 0
+    int 0
+    byte "total_product"
+    app_global_get_ex
+    assert // check self.total_product exists
+    itob
+    global LatestTimestamp
+    itob
+    swap
+    dup
+    byte 0x0014
+    concat
+    frame_dig -2
+    len
+    int 20
+    dig 1
+    +
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    concat
+    frame_dig -3
+    len
+    cover 3
+    uncover 4
+    concat
+    frame_dig -2
+    concat
+    frame_dig -3
+    concat
+    callsub save_history
+    pop
+    txn Sender
+    dig 2
+    byte 0x007a
+    concat
+    frame_dig -6
+    len
+    int 122
+    dig 1
+    +
+    dup
+    itob
+    extract 6 2
+    uncover 3
+    swap
+    concat
+    swap
+    int 9
+    +
+    swap
+    uncover 3
+    concat
+    frame_dig -4
+    concat
+    frame_dig -5
+    concat
+    dig 1
+    itob
+    extract 6 2
+    concat
+    swap
+    dig 5
+    +
+    dup
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    concat
+    swap
+    uncover 3
+    +
+    itob
+    extract 6 2
+    concat
+    byte 0x0000000000000000
+    concat
+    frame_dig -6
+    concat
+    byte 0x000743524541544544
+    concat
+    frame_dig -3
+    concat
+    frame_dig -2
+    concat
     frame_dig -1
     concat
+    callsub save_product
+    pop
+    swap
+    byte 0x000e
+    concat
+    int 14
+    uncover 2
+    +
+    dup
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    concat
+    swap
+    uncover 2
+    +
+    itob
+    extract 6 2
+    concat
+    frame_dig -6
+    concat
+    frame_dig -3
+    concat
+    frame_dig -1
+    concat
+    log
+    callsub increment_total_product
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.save_history(history: bytes) -> bytes:
+save_history:
+    proto 1 1
+    frame_dig -1
+    len
+    itob
+    extract 6 2
+    frame_dig -1
+    concat
+    byte 0x686973746f72795f
+    box_get
+    assert // check self.histories exists
+    frame_dig -1
+    extract 0 8 // on error: Index access is out of bounds
+    btoi
+    swap
+    cover 2
+    callsub dynamic_array_replace_byte_length_head
+    byte 0x686973746f72795f
+    box_del
+    pop
+    byte 0x686973746f72795f
+    swap
+    box_put
+    frame_dig -1
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.save_product(product: bytes) -> bytes:
+save_product:
+    proto 1 1
+    frame_dig -1
+    len
+    itob
+    extract 6 2
+    frame_dig -1
+    concat
+    byte 0x70726f647563745f
+    box_get
+    assert // check self.products exists
+    frame_dig -1
+    extract 0 8 // on error: Index access is out of bounds
+    btoi
+    swap
+    cover 2
+    callsub dynamic_array_replace_byte_length_head
+    byte 0x70726f647563745f
+    box_del
+    pop
+    byte 0x70726f647563745f
+    swap
+    box_put
+    frame_dig -1
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.increment_total_product() -> void:
+increment_total_product:
+    proto 0 0
+    int 0
+    byte "total_product"
+    app_global_get_ex
+    assert // check self.total_product exists
+    int 1
+    +
+    byte "total_product"
+    swap
+    app_global_put
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.ship_product(product_id: bytes, condition: bytes, location: bytes, delivery_date: bytes) -> void:
+ship_product:
+    proto 4 0
+    frame_dig -4
+    btoi
+    callsub get_product
+    global LatestTimestamp
+    itob
+    swap
+    txn Sender
+    dig 1
+    extract 44 32 // on error: Index access is out of bounds
+    ==
+    assert // Only the Intermediary can call this function
+    dup
+    int 10
+    extract_uint16
+    swap
+    dup
+    int 108
+    extract_uint16
+    dig 1
+    uncover 3
+    dig 2
+    substring3
+    byte 0x000743524541544544
+    ==
+    assert // Product is not in created state!
+    dig 1
+    extract 0 8 // on error: Index access is out of bounds
+    byte 0x0014
+    concat
+    frame_dig -2
+    len
+    int 20
+    dig 1
+    +
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    concat
+    frame_dig -3
+    len
+    cover 2
+    uncover 5
+    concat
+    frame_dig -2
+    concat
+    frame_dig -3
+    concat
+    callsub save_history
+    pop
+    dig 3
+    int 0
+    dig 4
+    extract3
+    swap
+    dig 4
+    int 110
+    extract_uint16
+    swap
+    dig 5
+    len
+    swap
+    uncover 6
+    dig 3
+    uncover 3
+    substring3
+    uncover 3
+    frame_dig -3
+    concat
+    swap
+    concat
+    uncover 2
+    uncover 4
+    -
+    swap
+    dup
+    int 110
+    extract_uint16
+    dig 4
+    +
+    dig 2
+    -
+    itob
+    extract 6 2
+    replace2 110
+    dup
+    int 112
+    extract_uint16
+    uncover 4
+    +
+    uncover 2
+    -
+    itob
+    extract 6 2
+    replace2 112
+    dup
+    int 110
+    extract_uint16
+    dig 1
+    int 0
+    dig 2
+    extract3
+    swap
+    dig 2
+    int 112
+    extract_uint16
+    swap
+    dig 3
+    len
+    swap
+    uncover 4
+    dig 3
+    uncover 3
+    substring3
+    uncover 3
+    frame_dig -2
+    concat
+    swap
+    concat
+    cover 2
+    -
+    swap
+    dup
+    int 112
+    extract_uint16
+    uncover 3
+    +
+    uncover 2
+    -
+    itob
+    extract 6 2
+    replace2 112
+    frame_dig -1
+    replace2 114
+    dup
+    int 10
+    extract_uint16
+    dig 1
+    int 0
+    dig 2
+    extract3
+    swap
+    dig 2
+    int 108
+    extract_uint16
+    swap
+    dig 3
+    len
+    swap
+    uncover 4
+    dig 3
+    uncover 3
+    substring3
+    uncover 3
+    byte 0x000753484950504544
+    concat
+    swap
+    concat
+    cover 2
+    -
+    swap
+    dup
+    int 108
+    extract_uint16
+    int 9
+    +
+    dig 2
+    -
+    itob
+    extract 6 2
+    replace2 108
+    dup
+    int 110
+    extract_uint16
+    int 9
+    +
+    dig 2
+    -
+    itob
+    extract 6 2
+    replace2 110
+    dup
+    int 112
+    extract_uint16
+    int 9
+    +
+    uncover 2
+    -
+    itob
+    extract 6 2
+    replace2 112
+    callsub update_product
+    extract 0 8 // on error: Index access is out of bounds
+    byte 0x000a
+    concat
+    frame_dig -3
+    concat
+    log
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.get_product(product_id: uint64) -> bytes:
+get_product:
+    proto 1 1
+    byte 0x70726f647563745f
+    box_get
+    assert // check self.products exists
+    dup
+    extract 2 0
+    swap
+    int 0
+    extract_uint16
+    frame_dig -1
+    >
+    assert // Index access is out of bounds
+    frame_dig -1
+    int 2
+    *
+    dig 1
+    swap
+    extract_uint16
+    dup2
+    extract_uint16
+    int 2
+    +
+    extract3
+    extract 2 0
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.update_product(product: bytes) -> bytes:
+update_product:
+    proto 1 1
+    frame_dig -1
+    callsub save_product
+    dup
+    frame_bury -1
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.alter_product(product_id: bytes, condition: bytes, location: bytes) -> void:
+alter_product:
+    proto 3 0
+    frame_dig -3
+    btoi
+    callsub get_product
+    global LatestTimestamp
+    itob
+    swap
+    txn Sender
+    dig 1
+    extract 44 32 // on error: Index access is out of bounds
+    ==
+    assert // Only the Intermediary can call this function
+    dup
+    int 10
+    extract_uint16
+    swap
+    dup
+    int 108
+    extract_uint16
+    dig 1
+    uncover 3
+    dig 2
+    substring3
+    byte 0x000753484950504544
+    ==
+    assert // Product is not in shipped state!
+    dig 1
+    int 0
+    dig 2
+    extract3
+    swap
+    dig 2
+    int 110
+    extract_uint16
+    swap
+    dig 3
+    len
+    swap
+    uncover 4
+    dig 3
+    uncover 3
+    substring3
+    uncover 3
+    frame_dig -2
+    concat
+    swap
+    concat
+    cover 2
+    -
+    swap
+    frame_dig -2
+    len
+    dig 1
+    int 110
+    extract_uint16
+    dig 1
+    +
+    dig 3
+    -
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    replace2 110
+    dup
+    int 112
+    extract_uint16
+    dig 2
+    +
+    uncover 3
+    -
+    itob
+    extract 6 2
+    replace2 112
+    dup
+    int 110
+    extract_uint16
+    dig 1
+    int 0
+    dig 2
+    extract3
+    swap
+    dig 2
+    int 112
+    extract_uint16
+    swap
+    dig 3
+    len
+    swap
+    uncover 4
+    dig 3
+    uncover 3
+    substring3
+    uncover 3
+    frame_dig -1
+    concat
+    swap
+    concat
+    cover 2
+    -
+    swap
+    frame_dig -1
+    len
+    dig 1
+    int 112
+    extract_uint16
+    dig 1
+    +
+    uncover 3
+    -
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    replace2 112
+    dup
+    extract 0 8 // on error: Index access is out of bounds
+    byte 0x0014
+    concat
+    int 20
+    uncover 3
+    +
+    itob
+    extract 6 2
+    concat
+    uncover 3
+    concat
+    frame_dig -1
+    concat
+    frame_dig -2
+    concat
+    callsub save_history
+    pop
+    callsub update_product
+    pop
+    frame_dig -3
+    byte 0x000c
+    concat
+    int 12
+    uncover 2
+    +
+    itob
+    extract 6 2
+    concat
+    frame_dig -2
+    concat
+    frame_dig -1
+    concat
+    log
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.deliver_product(product_id: bytes, condition: bytes) -> void:
+deliver_product:
+    proto 2 0
+    frame_dig -2
+    btoi
+    callsub get_product
+    global LatestTimestamp
+    itob
+    swap
+    txn Sender
+    dig 1
+    extract 76 32 // on error: Index access is out of bounds
+    ==
+    assert // Only the customer can call this function
+    dup
+    int 10
+    extract_uint16
+    swap
+    dup
+    int 108
+    extract_uint16
+    dig 1
+    uncover 3
+    uncover 2
+    substring3
+    byte 0x000753484950504544
+    ==
+    assert // Product is not in shipped state!
+    dup
+    int 112
+    extract_uint16
+    swap
+    dup
+    len
+    swap
+    dup
+    dig 3
+    uncover 3
+    substring3
+    swap
+    dup
+    int 110
+    extract_uint16
+    swap
+    int 0
+    dig 2
+    extract3
+    dig 2
+    concat
+    dig 2
+    concat
+    swap
+    uncover 3
+    swap
+    -
+    cover 2
+    swap
+    len
+    dig 1
+    int 112
+    extract_uint16
+    +
+    uncover 2
+    -
+    itob
+    extract 6 2
+    replace2 112
+    dup
+    int 108
+    extract_uint16
+    dig 1
+    int 0
+    dig 2
+    extract3
+    swap
+    dig 2
+    int 110
+    extract_uint16
+    swap
+    dig 3
+    len
+    swap
+    uncover 4
+    dig 3
+    uncover 3
+    substring3
+    uncover 3
+    frame_dig -1
+    concat
+    swap
+    concat
+    cover 2
+    -
+    swap
+    frame_dig -1
+    len
+    dig 1
+    int 110
+    extract_uint16
+    dig 1
+    +
+    dig 3
+    -
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    replace2 110
+    dup
+    int 112
+    extract_uint16
+    uncover 2
+    +
+    uncover 2
+    -
+    itob
+    extract 6 2
+    replace2 112
+    dup
+    int 10
+    extract_uint16
+    dig 1
+    int 0
+    dig 2
+    extract3
+    swap
+    dig 2
+    int 108
+    extract_uint16
+    swap
+    dig 3
+    len
+    swap
+    uncover 4
+    dig 3
+    uncover 3
+    substring3
+    uncover 3
+    byte 0x000944454c495645524544
+    concat
+    swap
+    concat
+    cover 2
+    -
+    swap
+    dup
+    int 108
+    extract_uint16
+    int 11
+    +
+    dig 2
+    -
+    itob
+    extract 6 2
+    replace2 108
+    dup
+    int 110
+    extract_uint16
+    int 11
+    +
+    dig 2
+    -
+    itob
+    extract 6 2
+    replace2 110
+    dup
+    int 112
+    extract_uint16
+    int 11
+    +
+    uncover 2
+    -
+    itob
+    extract 6 2
+    replace2 112
+    dup
+    extract 0 8 // on error: Index access is out of bounds
+    swap
+    dup
+    int 112
+    extract_uint16
+    swap
+    dup
+    len
+    swap
+    dup
+    uncover 3
+    uncover 3
+    substring3
+    uncover 2
+    byte 0x0014
+    concat
+    swap
+    dup
+    len
+    int 20
+    +
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    concat
+    uncover 3
+    concat
+    swap
+    concat
+    frame_dig -1
+    concat
+    callsub save_history
+    pop
+    callsub update_product
+    extract 0 8 // on error: Index access is out of bounds
+    byte 0x000a
+    concat
+    frame_dig -1
+    concat
+    log
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.get_product_history(product_id: bytes) -> bytes:
+get_product_history:
+    proto 1 1
+    frame_dig -1
+    btoi
+    callsub get_history
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.get_history(product_id: uint64) -> bytes:
+get_history:
+    proto 1 1
+    byte 0x686973746f72795f
+    box_get
+    assert // check self.histories exists
+    dup
+    extract 2 0
+    swap
+    int 0
+    extract_uint16
+    frame_dig -1
+    >
+    assert // Index access is out of bounds
+    frame_dig -1
+    int 2
+    *
+    dig 1
+    swap
+    extract_uint16
+    dup2
+    extract_uint16
+    int 2
+    +
+    extract3
+    extract 2 0
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.get_products() -> bytes:
+get_products:
+    proto 0 1
+    byte 0x70726f647563745f
+    box_get
+    assert // check self.products exists
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.__init__() -> void:
+__init__:
+    proto 0 0
+    byte "total_product"
+    int 0
+    app_global_put
+    retsub
+
+
+// _puya_lib.arc4.dynamic_array_replace_byte_length_head(array: bytes, new_item: bytes, index: uint64) -> bytes:
+dynamic_array_replace_byte_length_head:
+    proto 3 1
+    frame_dig -3
+    substring 0 2
+    dup
+    btoi
+    frame_dig -3
+    extract 2 0
+    frame_dig -2
+    frame_dig -1
+    uncover 3
+    callsub static_array_replace_byte_length_head
+    concat
+    retsub
+
+
+// _puya_lib.arc4.static_array_replace_byte_length_head(array_head_and_tail: bytes, new_item: bytes, index: uint64, array_length: uint64) -> bytes:
+static_array_replace_byte_length_head:
+    proto 4 1
+    frame_dig -2
+    frame_dig -1
+    <
+    assert // Index out of bounds
+    frame_dig -2
+    int 2
+    *
+    frame_dig -4
+    swap
+    extract_uint16
+    frame_dig -4
+    dig 1
+    extract_uint16
+    dig 1
+    +
+    int 2
+    +
+    swap
+    frame_dig -4
+    int 0
+    uncover 2
+    substring3
+    frame_dig -3
+    concat
+    frame_dig -4
+    len
+    frame_dig -4
+    uncover 3
+    uncover 2
+    substring3
+    concat
+    frame_dig -1
+    frame_dig -2
+    callsub recalculate_head_for_elements_with_byte_length_head
+    retsub
+
+
+// _puya_lib.arc4.recalculate_head_for_elements_with_byte_length_head(array_head_and_tail: bytes, length: uint64, start_at_index: uint64) -> bytes:
+recalculate_head_for_elements_with_byte_length_head:
+    proto 3 1
+    frame_dig -2
+    int 2
+    *
+    dup
+    frame_dig -1
+    int 2
+    *
+    dup
+    cover 2
+    frame_dig -3
+    swap
+    extract_uint16
+    frame_dig -1
+    select
+
+recalculate_head_for_elements_with_byte_length_head_for_header@1:
+    frame_dig 1
+    frame_dig 0
+    <
+    bz recalculate_head_for_elements_with_byte_length_head_after_for@4
+    frame_dig 2
+    dup
+    itob
+    extract 6 2
+    frame_dig -3
+    frame_dig 1
+    dup
+    cover 4
+    uncover 2
+    replace3
+    dup
+    frame_bury -3
+    dig 1
+    extract_uint16
+    int 2
+    +
+    +
+    frame_bury 2
+    int 2
+    +
+    frame_bury 1
+    b recalculate_head_for_elements_with_byte_length_head_for_header@1
+
+recalculate_head_for_elements_with_byte_length_head_after_for@4:
+    frame_dig -3
+    frame_bury 0
     retsub

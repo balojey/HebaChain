@@ -23,20 +23,68 @@ from algosdk.atomic_transaction_composer import (
 
 _APP_SPEC_JSON = r"""{
     "hints": {
-        "hello(string)string": {
+        "add_product(string,address,address,string,string,string)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "ship_product(uint64,string,string,uint64)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "alter_product(uint64,string,string)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "deliver_product(uint64,string)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "get_product_history(uint64)(uint64,string,string,uint64)": {
+            "structs": {
+                "output": {
+                    "name": "History",
+                    "elements": [
+                        [
+                            "product_id",
+                            "uint64"
+                        ],
+                        [
+                            "location",
+                            "string"
+                        ],
+                        [
+                            "condition",
+                            "string"
+                        ],
+                        [
+                            "timestamp",
+                            "uint64"
+                        ]
+                    ]
+                }
+            },
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "get_products()byte[]": {
             "call_config": {
                 "no_op": "CALL"
             }
         }
     },
     "source": {
-        "approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCgpzbWFydF9jb250cmFjdHMuaGViYV9jaGFpbi5jb250cmFjdC5IZWJhQ2hhaW4uYXBwcm92YWxfcHJvZ3JhbToKICAgIGNhbGxzdWIgX19wdXlhX2FyYzRfcm91dGVyX18KICAgIHJldHVybgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5oZWJhX2NoYWluLmNvbnRyYWN0LkhlYmFDaGFpbi5fX3B1eWFfYXJjNF9yb3V0ZXJfXygpIC0+IHVpbnQ2NDoKX19wdXlhX2FyYzRfcm91dGVyX186CiAgICBwcm90byAwIDEKICAgIHR4biBOdW1BcHBBcmdzCiAgICBieiBfX3B1eWFfYXJjNF9yb3V0ZXJfX19iYXJlX3JvdXRpbmdANQogICAgbWV0aG9kICJoZWxsbyhzdHJpbmcpc3RyaW5nIgogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAogICAgbWF0Y2ggX19wdXlhX2FyYzRfcm91dGVyX19faGVsbG9fcm91dGVAMgogICAgaW50IDAKICAgIHJldHN1YgoKX19wdXlhX2FyYzRfcm91dGVyX19faGVsbG9fcm91dGVAMjoKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgTm9PcAogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgIGFzc2VydCAvLyBpcyBub3QgY3JlYXRpbmcKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDEKICAgIGV4dHJhY3QgMiAwCiAgICBjYWxsc3ViIGhlbGxvCiAgICBkdXAKICAgIGxlbgogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIHN3YXAKICAgIGNvbmNhdAogICAgYnl0ZSAweDE1MWY3Yzc1CiAgICBzd2FwCiAgICBjb25jYXQKICAgIGxvZwogICAgaW50IDEKICAgIHJldHN1YgoKX19wdXlhX2FyYzRfcm91dGVyX19fYmFyZV9yb3V0aW5nQDU6CiAgICB0eG4gT25Db21wbGV0aW9uCiAgICBibnogX19wdXlhX2FyYzRfcm91dGVyX19fYWZ0ZXJfaWZfZWxzZUA5CiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgIQogICAgYXNzZXJ0IC8vIGlzIGNyZWF0aW5nCiAgICBpbnQgMQogICAgcmV0c3ViCgpfX3B1eWFfYXJjNF9yb3V0ZXJfX19hZnRlcl9pZl9lbHNlQDk6CiAgICBpbnQgMAogICAgcmV0c3ViCgoKLy8gc21hcnRfY29udHJhY3RzLmhlYmFfY2hhaW4uY29udHJhY3QuSGViYUNoYWluLmhlbGxvKG5hbWU6IGJ5dGVzKSAtPiBieXRlczoKaGVsbG86CiAgICBwcm90byAxIDEKICAgIGJ5dGUgIkhlbGxvLCAiCiAgICBmcmFtZV9kaWcgLTEKICAgIGNvbmNhdAogICAgcmV0c3ViCg==",
+        "approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCgpzbWFydF9jb250cmFjdHMuaGViYV9jaGFpbi5jb250cmFjdC5IZWJhQ2hhaW4uYXBwcm92YWxfcHJvZ3JhbToKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBibnogbWFpbl9lbnRyeXBvaW50QDIKICAgIGNhbGxzdWIgX19pbml0X18KCm1haW5fZW50cnlwb2ludEAyOgogICAgY2FsbHN1YiBfX3B1eWFfYXJjNF9yb3V0ZXJfXwogICAgcmV0dXJuCgoKLy8gc21hcnRfY29udHJhY3RzLmhlYmFfY2hhaW4uY29udHJhY3QuSGViYUNoYWluLl9fcHV5YV9hcmM0X3JvdXRlcl9fKCkgLT4gdWludDY0OgpfX3B1eWFfYXJjNF9yb3V0ZXJfXzoKICAgIHByb3RvIDAgMQogICAgdHhuIE51bUFwcEFyZ3MKICAgIGJ6IF9fcHV5YV9hcmM0X3JvdXRlcl9fX2JhcmVfcm91dGluZ0AxMAogICAgbWV0aG9kICJhZGRfcHJvZHVjdChzdHJpbmcsYWRkcmVzcyxhZGRyZXNzLHN0cmluZyxzdHJpbmcsc3RyaW5nKXZvaWQiCiAgICBtZXRob2QgInNoaXBfcHJvZHVjdCh1aW50NjQsc3RyaW5nLHN0cmluZyx1aW50NjQpdm9pZCIKICAgIG1ldGhvZCAiYWx0ZXJfcHJvZHVjdCh1aW50NjQsc3RyaW5nLHN0cmluZyl2b2lkIgogICAgbWV0aG9kICJkZWxpdmVyX3Byb2R1Y3QodWludDY0LHN0cmluZyl2b2lkIgogICAgbWV0aG9kICJnZXRfcHJvZHVjdF9oaXN0b3J5KHVpbnQ2NCkodWludDY0LHN0cmluZyxzdHJpbmcsdWludDY0KSIKICAgIG1ldGhvZCAiZ2V0X3Byb2R1Y3RzKClieXRlW10iCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAwCiAgICBtYXRjaCBfX3B1eWFfYXJjNF9yb3V0ZXJfX19hZGRfcHJvZHVjdF9yb3V0ZUAyIF9fcHV5YV9hcmM0X3JvdXRlcl9fX3NoaXBfcHJvZHVjdF9yb3V0ZUAzIF9fcHV5YV9hcmM0X3JvdXRlcl9fX2FsdGVyX3Byb2R1Y3Rfcm91dGVANCBfX3B1eWFfYXJjNF9yb3V0ZXJfX19kZWxpdmVyX3Byb2R1Y3Rfcm91dGVANSBfX3B1eWFfYXJjNF9yb3V0ZXJfX19nZXRfcHJvZHVjdF9oaXN0b3J5X3JvdXRlQDYgX19wdXlhX2FyYzRfcm91dGVyX19fZ2V0X3Byb2R1Y3RzX3JvdXRlQDcKICAgIGludCAwCiAgICByZXRzdWIKCl9fcHV5YV9hcmM0X3JvdXRlcl9fX2FkZF9wcm9kdWN0X3JvdXRlQDI6CiAgICB0eG4gT25Db21wbGV0aW9uCiAgICAhCiAgICBhc3NlcnQgLy8gT25Db21wbGV0aW9uIGlzIE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBhc3NlcnQgLy8gaXMgbm90IGNyZWF0aW5nCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAyCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAzCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyA0CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyA1CiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyA2CiAgICBjYWxsc3ViIGFkZF9wcm9kdWN0CiAgICBpbnQgMQogICAgcmV0c3ViCgpfX3B1eWFfYXJjNF9yb3V0ZXJfX19zaGlwX3Byb2R1Y3Rfcm91dGVAMzoKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgTm9PcAogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgIGFzc2VydCAvLyBpcyBub3QgY3JlYXRpbmcKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDEKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDIKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDMKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDQKICAgIGNhbGxzdWIgc2hpcF9wcm9kdWN0CiAgICBpbnQgMQogICAgcmV0c3ViCgpfX3B1eWFfYXJjNF9yb3V0ZXJfX19hbHRlcl9wcm9kdWN0X3JvdXRlQDQ6CiAgICB0eG4gT25Db21wbGV0aW9uCiAgICAhCiAgICBhc3NlcnQgLy8gT25Db21wbGV0aW9uIGlzIE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBhc3NlcnQgLy8gaXMgbm90IGNyZWF0aW5nCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAyCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAzCiAgICBjYWxsc3ViIGFsdGVyX3Byb2R1Y3QKICAgIGludCAxCiAgICByZXRzdWIKCl9fcHV5YV9hcmM0X3JvdXRlcl9fX2RlbGl2ZXJfcHJvZHVjdF9yb3V0ZUA1OgogICAgdHhuIE9uQ29tcGxldGlvbgogICAgIQogICAgYXNzZXJ0IC8vIE9uQ29tcGxldGlvbiBpcyBOb09wCiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgYXNzZXJ0IC8vIGlzIG5vdCBjcmVhdGluZwogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMgogICAgY2FsbHN1YiBkZWxpdmVyX3Byb2R1Y3QKICAgIGludCAxCiAgICByZXRzdWIKCl9fcHV5YV9hcmM0X3JvdXRlcl9fX2dldF9wcm9kdWN0X2hpc3Rvcnlfcm91dGVANjoKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgTm9PcAogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgIGFzc2VydCAvLyBpcyBub3QgY3JlYXRpbmcKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDEKICAgIGNhbGxzdWIgZ2V0X3Byb2R1Y3RfaGlzdG9yeQogICAgYnl0ZSAweDE1MWY3Yzc1CiAgICBzd2FwCiAgICBjb25jYXQKICAgIGxvZwogICAgaW50IDEKICAgIHJldHN1YgoKX19wdXlhX2FyYzRfcm91dGVyX19fZ2V0X3Byb2R1Y3RzX3JvdXRlQDc6CiAgICB0eG4gT25Db21wbGV0aW9uCiAgICAhCiAgICBhc3NlcnQgLy8gT25Db21wbGV0aW9uIGlzIE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBhc3NlcnQgLy8gaXMgbm90IGNyZWF0aW5nCiAgICBjYWxsc3ViIGdldF9wcm9kdWN0cwogICAgZHVwCiAgICBsZW4KICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICBzd2FwCiAgICBjb25jYXQKICAgIGJ5dGUgMHgxNTFmN2M3NQogICAgc3dhcAogICAgY29uY2F0CiAgICBsb2cKICAgIGludCAxCiAgICByZXRzdWIKCl9fcHV5YV9hcmM0X3JvdXRlcl9fX2JhcmVfcm91dGluZ0AxMDoKICAgIHR4biBPbkNvbXBsZXRpb24KICAgIGJueiBfX3B1eWFfYXJjNF9yb3V0ZXJfX19hZnRlcl9pZl9lbHNlQDE0CiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgIQogICAgYXNzZXJ0IC8vIGlzIGNyZWF0aW5nCiAgICBpbnQgMQogICAgcmV0c3ViCgpfX3B1eWFfYXJjNF9yb3V0ZXJfX19hZnRlcl9pZl9lbHNlQDE0OgogICAgaW50IDAKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5oZWJhX2NoYWluLmNvbnRyYWN0LkhlYmFDaGFpbi5hZGRfcHJvZHVjdChuYW1lOiBieXRlcywgY3VzdG9tZXI6IGJ5dGVzLCBpbnRlcm1lZGlhcnk6IGJ5dGVzLCBjb25kaXRpb246IGJ5dGVzLCBjdXJyZW50X2xvY2F0aW9uOiBieXRlcywgZGVsaXZlcnlfbG9jYXRpb246IGJ5dGVzKSAtPiB2b2lkOgphZGRfcHJvZHVjdDoKICAgIHByb3RvIDYgMAogICAgaW50IDAKICAgIGJ5dGUgInRvdGFsX3Byb2R1Y3QiCiAgICBhcHBfZ2xvYmFsX2dldF9leAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYudG90YWxfcHJvZHVjdCBleGlzdHMKICAgIGl0b2IKICAgIGdsb2JhbCBMYXRlc3RUaW1lc3RhbXAKICAgIGl0b2IKICAgIHN3YXAKICAgIGR1cAogICAgYnl0ZSAweDAwMTQKICAgIGNvbmNhdAogICAgZnJhbWVfZGlnIC0yCiAgICBsZW4KICAgIGludCAyMAogICAgZGlnIDEKICAgICsKICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICB1bmNvdmVyIDIKICAgIHN3YXAKICAgIGNvbmNhdAogICAgZnJhbWVfZGlnIC0zCiAgICBsZW4KICAgIGNvdmVyIDMKICAgIHVuY292ZXIgNAogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTIKICAgIGNvbmNhdAogICAgZnJhbWVfZGlnIC0zCiAgICBjb25jYXQKICAgIGNhbGxzdWIgc2F2ZV9oaXN0b3J5CiAgICBwb3AKICAgIHR4biBTZW5kZXIKICAgIGRpZyAyCiAgICBieXRlIDB4MDA3YQogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTYKICAgIGxlbgogICAgaW50IDEyMgogICAgZGlnIDEKICAgICsKICAgIGR1cAogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIHVuY292ZXIgMwogICAgc3dhcAogICAgY29uY2F0CiAgICBzd2FwCiAgICBpbnQgOQogICAgKwogICAgc3dhcAogICAgdW5jb3ZlciAzCiAgICBjb25jYXQKICAgIGZyYW1lX2RpZyAtNAogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTUKICAgIGNvbmNhdAogICAgZGlnIDEKICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICBjb25jYXQKICAgIHN3YXAKICAgIGRpZyA1CiAgICArCiAgICBkdXAKICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICB1bmNvdmVyIDIKICAgIHN3YXAKICAgIGNvbmNhdAogICAgc3dhcAogICAgdW5jb3ZlciAzCiAgICArCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgY29uY2F0CiAgICBieXRlIDB4MDAwMDAwMDAwMDAwMDAwMAogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTYKICAgIGNvbmNhdAogICAgYnl0ZSAweDAwMDc0MzUyNDU0MTU0NDU0NAogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTMKICAgIGNvbmNhdAogICAgZnJhbWVfZGlnIC0yCiAgICBjb25jYXQKICAgIGZyYW1lX2RpZyAtMQogICAgY29uY2F0CiAgICBjYWxsc3ViIHNhdmVfcHJvZHVjdAogICAgcG9wCiAgICBzd2FwCiAgICBieXRlIDB4MDAwZQogICAgY29uY2F0CiAgICBpbnQgMTQKICAgIHVuY292ZXIgMgogICAgKwogICAgZHVwCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgdW5jb3ZlciAyCiAgICBzd2FwCiAgICBjb25jYXQKICAgIHN3YXAKICAgIHVuY292ZXIgMgogICAgKwogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIGNvbmNhdAogICAgZnJhbWVfZGlnIC02CiAgICBjb25jYXQKICAgIGZyYW1lX2RpZyAtMwogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTEKICAgIGNvbmNhdAogICAgbG9nCiAgICBjYWxsc3ViIGluY3JlbWVudF90b3RhbF9wcm9kdWN0CiAgICByZXRzdWIKCgovLyBzbWFydF9jb250cmFjdHMuaGViYV9jaGFpbi5jb250cmFjdC5IZWJhQ2hhaW4uc2F2ZV9oaXN0b3J5KGhpc3Rvcnk6IGJ5dGVzKSAtPiBieXRlczoKc2F2ZV9oaXN0b3J5OgogICAgcHJvdG8gMSAxCiAgICBmcmFtZV9kaWcgLTEKICAgIGxlbgogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIGZyYW1lX2RpZyAtMQogICAgY29uY2F0CiAgICBieXRlIDB4Njg2OTczNzQ2ZjcyNzk1ZgogICAgYm94X2dldAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYuaGlzdG9yaWVzIGV4aXN0cwogICAgZnJhbWVfZGlnIC0xCiAgICBleHRyYWN0IDAgOCAvLyBvbiBlcnJvcjogSW5kZXggYWNjZXNzIGlzIG91dCBvZiBib3VuZHMKICAgIGJ0b2kKICAgIHN3YXAKICAgIGNvdmVyIDIKICAgIGNhbGxzdWIgZHluYW1pY19hcnJheV9yZXBsYWNlX2J5dGVfbGVuZ3RoX2hlYWQKICAgIGJ5dGUgMHg2ODY5NzM3NDZmNzI3OTVmCiAgICBib3hfZGVsCiAgICBwb3AKICAgIGJ5dGUgMHg2ODY5NzM3NDZmNzI3OTVmCiAgICBzd2FwCiAgICBib3hfcHV0CiAgICBmcmFtZV9kaWcgLTEKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5oZWJhX2NoYWluLmNvbnRyYWN0LkhlYmFDaGFpbi5zYXZlX3Byb2R1Y3QocHJvZHVjdDogYnl0ZXMpIC0+IGJ5dGVzOgpzYXZlX3Byb2R1Y3Q6CiAgICBwcm90byAxIDEKICAgIGZyYW1lX2RpZyAtMQogICAgbGVuCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgZnJhbWVfZGlnIC0xCiAgICBjb25jYXQKICAgIGJ5dGUgMHg3MDcyNmY2NDc1NjM3NDVmCiAgICBib3hfZ2V0CiAgICBhc3NlcnQgLy8gY2hlY2sgc2VsZi5wcm9kdWN0cyBleGlzdHMKICAgIGZyYW1lX2RpZyAtMQogICAgZXh0cmFjdCAwIDggLy8gb24gZXJyb3I6IEluZGV4IGFjY2VzcyBpcyBvdXQgb2YgYm91bmRzCiAgICBidG9pCiAgICBzd2FwCiAgICBjb3ZlciAyCiAgICBjYWxsc3ViIGR5bmFtaWNfYXJyYXlfcmVwbGFjZV9ieXRlX2xlbmd0aF9oZWFkCiAgICBieXRlIDB4NzA3MjZmNjQ3NTYzNzQ1ZgogICAgYm94X2RlbAogICAgcG9wCiAgICBieXRlIDB4NzA3MjZmNjQ3NTYzNzQ1ZgogICAgc3dhcAogICAgYm94X3B1dAogICAgZnJhbWVfZGlnIC0xCiAgICByZXRzdWIKCgovLyBzbWFydF9jb250cmFjdHMuaGViYV9jaGFpbi5jb250cmFjdC5IZWJhQ2hhaW4uaW5jcmVtZW50X3RvdGFsX3Byb2R1Y3QoKSAtPiB2b2lkOgppbmNyZW1lbnRfdG90YWxfcHJvZHVjdDoKICAgIHByb3RvIDAgMAogICAgaW50IDAKICAgIGJ5dGUgInRvdGFsX3Byb2R1Y3QiCiAgICBhcHBfZ2xvYmFsX2dldF9leAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYudG90YWxfcHJvZHVjdCBleGlzdHMKICAgIGludCAxCiAgICArCiAgICBieXRlICJ0b3RhbF9wcm9kdWN0IgogICAgc3dhcAogICAgYXBwX2dsb2JhbF9wdXQKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5oZWJhX2NoYWluLmNvbnRyYWN0LkhlYmFDaGFpbi5zaGlwX3Byb2R1Y3QocHJvZHVjdF9pZDogYnl0ZXMsIGNvbmRpdGlvbjogYnl0ZXMsIGxvY2F0aW9uOiBieXRlcywgZGVsaXZlcnlfZGF0ZTogYnl0ZXMpIC0+IHZvaWQ6CnNoaXBfcHJvZHVjdDoKICAgIHByb3RvIDQgMAogICAgZnJhbWVfZGlnIC00CiAgICBidG9pCiAgICBjYWxsc3ViIGdldF9wcm9kdWN0CiAgICBnbG9iYWwgTGF0ZXN0VGltZXN0YW1wCiAgICBpdG9iCiAgICBzd2FwCiAgICB0eG4gU2VuZGVyCiAgICBkaWcgMQogICAgZXh0cmFjdCA0NCAzMiAvLyBvbiBlcnJvcjogSW5kZXggYWNjZXNzIGlzIG91dCBvZiBib3VuZHMKICAgID09CiAgICBhc3NlcnQgLy8gT25seSB0aGUgSW50ZXJtZWRpYXJ5IGNhbiBjYWxsIHRoaXMgZnVuY3Rpb24KICAgIGR1cAogICAgaW50IDEwCiAgICBleHRyYWN0X3VpbnQxNgogICAgc3dhcAogICAgZHVwCiAgICBpbnQgMTA4CiAgICBleHRyYWN0X3VpbnQxNgogICAgZGlnIDEKICAgIHVuY292ZXIgMwogICAgZGlnIDIKICAgIHN1YnN0cmluZzMKICAgIGJ5dGUgMHgwMDA3NDM1MjQ1NDE1NDQ1NDQKICAgID09CiAgICBhc3NlcnQgLy8gUHJvZHVjdCBpcyBub3QgaW4gY3JlYXRlZCBzdGF0ZSEKICAgIGRpZyAxCiAgICBleHRyYWN0IDAgOCAvLyBvbiBlcnJvcjogSW5kZXggYWNjZXNzIGlzIG91dCBvZiBib3VuZHMKICAgIGJ5dGUgMHgwMDE0CiAgICBjb25jYXQKICAgIGZyYW1lX2RpZyAtMgogICAgbGVuCiAgICBpbnQgMjAKICAgIGRpZyAxCiAgICArCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgdW5jb3ZlciAyCiAgICBzd2FwCiAgICBjb25jYXQKICAgIGZyYW1lX2RpZyAtMwogICAgbGVuCiAgICBjb3ZlciAyCiAgICB1bmNvdmVyIDUKICAgIGNvbmNhdAogICAgZnJhbWVfZGlnIC0yCiAgICBjb25jYXQKICAgIGZyYW1lX2RpZyAtMwogICAgY29uY2F0CiAgICBjYWxsc3ViIHNhdmVfaGlzdG9yeQogICAgcG9wCiAgICBkaWcgMwogICAgaW50IDAKICAgIGRpZyA0CiAgICBleHRyYWN0MwogICAgc3dhcAogICAgZGlnIDQKICAgIGludCAxMTAKICAgIGV4dHJhY3RfdWludDE2CiAgICBzd2FwCiAgICBkaWcgNQogICAgbGVuCiAgICBzd2FwCiAgICB1bmNvdmVyIDYKICAgIGRpZyAzCiAgICB1bmNvdmVyIDMKICAgIHN1YnN0cmluZzMKICAgIHVuY292ZXIgMwogICAgZnJhbWVfZGlnIC0zCiAgICBjb25jYXQKICAgIHN3YXAKICAgIGNvbmNhdAogICAgdW5jb3ZlciAyCiAgICB1bmNvdmVyIDQKICAgIC0KICAgIHN3YXAKICAgIGR1cAogICAgaW50IDExMAogICAgZXh0cmFjdF91aW50MTYKICAgIGRpZyA0CiAgICArCiAgICBkaWcgMgogICAgLQogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIHJlcGxhY2UyIDExMAogICAgZHVwCiAgICBpbnQgMTEyCiAgICBleHRyYWN0X3VpbnQxNgogICAgdW5jb3ZlciA0CiAgICArCiAgICB1bmNvdmVyIDIKICAgIC0KICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICByZXBsYWNlMiAxMTIKICAgIGR1cAogICAgaW50IDExMAogICAgZXh0cmFjdF91aW50MTYKICAgIGRpZyAxCiAgICBpbnQgMAogICAgZGlnIDIKICAgIGV4dHJhY3QzCiAgICBzd2FwCiAgICBkaWcgMgogICAgaW50IDExMgogICAgZXh0cmFjdF91aW50MTYKICAgIHN3YXAKICAgIGRpZyAzCiAgICBsZW4KICAgIHN3YXAKICAgIHVuY292ZXIgNAogICAgZGlnIDMKICAgIHVuY292ZXIgMwogICAgc3Vic3RyaW5nMwogICAgdW5jb3ZlciAzCiAgICBmcmFtZV9kaWcgLTIKICAgIGNvbmNhdAogICAgc3dhcAogICAgY29uY2F0CiAgICBjb3ZlciAyCiAgICAtCiAgICBzd2FwCiAgICBkdXAKICAgIGludCAxMTIKICAgIGV4dHJhY3RfdWludDE2CiAgICB1bmNvdmVyIDMKICAgICsKICAgIHVuY292ZXIgMgogICAgLQogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIHJlcGxhY2UyIDExMgogICAgZnJhbWVfZGlnIC0xCiAgICByZXBsYWNlMiAxMTQKICAgIGR1cAogICAgaW50IDEwCiAgICBleHRyYWN0X3VpbnQxNgogICAgZGlnIDEKICAgIGludCAwCiAgICBkaWcgMgogICAgZXh0cmFjdDMKICAgIHN3YXAKICAgIGRpZyAyCiAgICBpbnQgMTA4CiAgICBleHRyYWN0X3VpbnQxNgogICAgc3dhcAogICAgZGlnIDMKICAgIGxlbgogICAgc3dhcAogICAgdW5jb3ZlciA0CiAgICBkaWcgMwogICAgdW5jb3ZlciAzCiAgICBzdWJzdHJpbmczCiAgICB1bmNvdmVyIDMKICAgIGJ5dGUgMHgwMDA3NTM0ODQ5NTA1MDQ1NDQKICAgIGNvbmNhdAogICAgc3dhcAogICAgY29uY2F0CiAgICBjb3ZlciAyCiAgICAtCiAgICBzd2FwCiAgICBkdXAKICAgIGludCAxMDgKICAgIGV4dHJhY3RfdWludDE2CiAgICBpbnQgOQogICAgKwogICAgZGlnIDIKICAgIC0KICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICByZXBsYWNlMiAxMDgKICAgIGR1cAogICAgaW50IDExMAogICAgZXh0cmFjdF91aW50MTYKICAgIGludCA5CiAgICArCiAgICBkaWcgMgogICAgLQogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIHJlcGxhY2UyIDExMAogICAgZHVwCiAgICBpbnQgMTEyCiAgICBleHRyYWN0X3VpbnQxNgogICAgaW50IDkKICAgICsKICAgIHVuY292ZXIgMgogICAgLQogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIHJlcGxhY2UyIDExMgogICAgY2FsbHN1YiB1cGRhdGVfcHJvZHVjdAogICAgZXh0cmFjdCAwIDggLy8gb24gZXJyb3I6IEluZGV4IGFjY2VzcyBpcyBvdXQgb2YgYm91bmRzCiAgICBieXRlIDB4MDAwYQogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTMKICAgIGNvbmNhdAogICAgbG9nCiAgICByZXRzdWIKCgovLyBzbWFydF9jb250cmFjdHMuaGViYV9jaGFpbi5jb250cmFjdC5IZWJhQ2hhaW4uZ2V0X3Byb2R1Y3QocHJvZHVjdF9pZDogdWludDY0KSAtPiBieXRlczoKZ2V0X3Byb2R1Y3Q6CiAgICBwcm90byAxIDEKICAgIGJ5dGUgMHg3MDcyNmY2NDc1NjM3NDVmCiAgICBib3hfZ2V0CiAgICBhc3NlcnQgLy8gY2hlY2sgc2VsZi5wcm9kdWN0cyBleGlzdHMKICAgIGR1cAogICAgZXh0cmFjdCAyIDAKICAgIHN3YXAKICAgIGludCAwCiAgICBleHRyYWN0X3VpbnQxNgogICAgZnJhbWVfZGlnIC0xCiAgICA+CiAgICBhc3NlcnQgLy8gSW5kZXggYWNjZXNzIGlzIG91dCBvZiBib3VuZHMKICAgIGZyYW1lX2RpZyAtMQogICAgaW50IDIKICAgICoKICAgIGRpZyAxCiAgICBzd2FwCiAgICBleHRyYWN0X3VpbnQxNgogICAgZHVwMgogICAgZXh0cmFjdF91aW50MTYKICAgIGludCAyCiAgICArCiAgICBleHRyYWN0MwogICAgZXh0cmFjdCAyIDAKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5oZWJhX2NoYWluLmNvbnRyYWN0LkhlYmFDaGFpbi51cGRhdGVfcHJvZHVjdChwcm9kdWN0OiBieXRlcykgLT4gYnl0ZXM6CnVwZGF0ZV9wcm9kdWN0OgogICAgcHJvdG8gMSAxCiAgICBmcmFtZV9kaWcgLTEKICAgIGNhbGxzdWIgc2F2ZV9wcm9kdWN0CiAgICBkdXAKICAgIGZyYW1lX2J1cnkgLTEKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5oZWJhX2NoYWluLmNvbnRyYWN0LkhlYmFDaGFpbi5hbHRlcl9wcm9kdWN0KHByb2R1Y3RfaWQ6IGJ5dGVzLCBjb25kaXRpb246IGJ5dGVzLCBsb2NhdGlvbjogYnl0ZXMpIC0+IHZvaWQ6CmFsdGVyX3Byb2R1Y3Q6CiAgICBwcm90byAzIDAKICAgIGZyYW1lX2RpZyAtMwogICAgYnRvaQogICAgY2FsbHN1YiBnZXRfcHJvZHVjdAogICAgZ2xvYmFsIExhdGVzdFRpbWVzdGFtcAogICAgaXRvYgogICAgc3dhcAogICAgdHhuIFNlbmRlcgogICAgZGlnIDEKICAgIGV4dHJhY3QgNDQgMzIgLy8gb24gZXJyb3I6IEluZGV4IGFjY2VzcyBpcyBvdXQgb2YgYm91bmRzCiAgICA9PQogICAgYXNzZXJ0IC8vIE9ubHkgdGhlIEludGVybWVkaWFyeSBjYW4gY2FsbCB0aGlzIGZ1bmN0aW9uCiAgICBkdXAKICAgIGludCAxMAogICAgZXh0cmFjdF91aW50MTYKICAgIHN3YXAKICAgIGR1cAogICAgaW50IDEwOAogICAgZXh0cmFjdF91aW50MTYKICAgIGRpZyAxCiAgICB1bmNvdmVyIDMKICAgIGRpZyAyCiAgICBzdWJzdHJpbmczCiAgICBieXRlIDB4MDAwNzUzNDg0OTUwNTA0NTQ0CiAgICA9PQogICAgYXNzZXJ0IC8vIFByb2R1Y3QgaXMgbm90IGluIHNoaXBwZWQgc3RhdGUhCiAgICBkaWcgMQogICAgaW50IDAKICAgIGRpZyAyCiAgICBleHRyYWN0MwogICAgc3dhcAogICAgZGlnIDIKICAgIGludCAxMTAKICAgIGV4dHJhY3RfdWludDE2CiAgICBzd2FwCiAgICBkaWcgMwogICAgbGVuCiAgICBzd2FwCiAgICB1bmNvdmVyIDQKICAgIGRpZyAzCiAgICB1bmNvdmVyIDMKICAgIHN1YnN0cmluZzMKICAgIHVuY292ZXIgMwogICAgZnJhbWVfZGlnIC0yCiAgICBjb25jYXQKICAgIHN3YXAKICAgIGNvbmNhdAogICAgY292ZXIgMgogICAgLQogICAgc3dhcAogICAgZnJhbWVfZGlnIC0yCiAgICBsZW4KICAgIGRpZyAxCiAgICBpbnQgMTEwCiAgICBleHRyYWN0X3VpbnQxNgogICAgZGlnIDEKICAgICsKICAgIGRpZyAzCiAgICAtCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgdW5jb3ZlciAyCiAgICBzd2FwCiAgICByZXBsYWNlMiAxMTAKICAgIGR1cAogICAgaW50IDExMgogICAgZXh0cmFjdF91aW50MTYKICAgIGRpZyAyCiAgICArCiAgICB1bmNvdmVyIDMKICAgIC0KICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICByZXBsYWNlMiAxMTIKICAgIGR1cAogICAgaW50IDExMAogICAgZXh0cmFjdF91aW50MTYKICAgIGRpZyAxCiAgICBpbnQgMAogICAgZGlnIDIKICAgIGV4dHJhY3QzCiAgICBzd2FwCiAgICBkaWcgMgogICAgaW50IDExMgogICAgZXh0cmFjdF91aW50MTYKICAgIHN3YXAKICAgIGRpZyAzCiAgICBsZW4KICAgIHN3YXAKICAgIHVuY292ZXIgNAogICAgZGlnIDMKICAgIHVuY292ZXIgMwogICAgc3Vic3RyaW5nMwogICAgdW5jb3ZlciAzCiAgICBmcmFtZV9kaWcgLTEKICAgIGNvbmNhdAogICAgc3dhcAogICAgY29uY2F0CiAgICBjb3ZlciAyCiAgICAtCiAgICBzd2FwCiAgICBmcmFtZV9kaWcgLTEKICAgIGxlbgogICAgZGlnIDEKICAgIGludCAxMTIKICAgIGV4dHJhY3RfdWludDE2CiAgICBkaWcgMQogICAgKwogICAgdW5jb3ZlciAzCiAgICAtCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgdW5jb3ZlciAyCiAgICBzd2FwCiAgICByZXBsYWNlMiAxMTIKICAgIGR1cAogICAgZXh0cmFjdCAwIDggLy8gb24gZXJyb3I6IEluZGV4IGFjY2VzcyBpcyBvdXQgb2YgYm91bmRzCiAgICBieXRlIDB4MDAxNAogICAgY29uY2F0CiAgICBpbnQgMjAKICAgIHVuY292ZXIgMwogICAgKwogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIGNvbmNhdAogICAgdW5jb3ZlciAzCiAgICBjb25jYXQKICAgIGZyYW1lX2RpZyAtMQogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTIKICAgIGNvbmNhdAogICAgY2FsbHN1YiBzYXZlX2hpc3RvcnkKICAgIHBvcAogICAgY2FsbHN1YiB1cGRhdGVfcHJvZHVjdAogICAgcG9wCiAgICBmcmFtZV9kaWcgLTMKICAgIGJ5dGUgMHgwMDBjCiAgICBjb25jYXQKICAgIGludCAxMgogICAgdW5jb3ZlciAyCiAgICArCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTIKICAgIGNvbmNhdAogICAgZnJhbWVfZGlnIC0xCiAgICBjb25jYXQKICAgIGxvZwogICAgcmV0c3ViCgoKLy8gc21hcnRfY29udHJhY3RzLmhlYmFfY2hhaW4uY29udHJhY3QuSGViYUNoYWluLmRlbGl2ZXJfcHJvZHVjdChwcm9kdWN0X2lkOiBieXRlcywgY29uZGl0aW9uOiBieXRlcykgLT4gdm9pZDoKZGVsaXZlcl9wcm9kdWN0OgogICAgcHJvdG8gMiAwCiAgICBmcmFtZV9kaWcgLTIKICAgIGJ0b2kKICAgIGNhbGxzdWIgZ2V0X3Byb2R1Y3QKICAgIGdsb2JhbCBMYXRlc3RUaW1lc3RhbXAKICAgIGl0b2IKICAgIHN3YXAKICAgIHR4biBTZW5kZXIKICAgIGRpZyAxCiAgICBleHRyYWN0IDc2IDMyIC8vIG9uIGVycm9yOiBJbmRleCBhY2Nlc3MgaXMgb3V0IG9mIGJvdW5kcwogICAgPT0KICAgIGFzc2VydCAvLyBPbmx5IHRoZSBjdXN0b21lciBjYW4gY2FsbCB0aGlzIGZ1bmN0aW9uCiAgICBkdXAKICAgIGludCAxMAogICAgZXh0cmFjdF91aW50MTYKICAgIHN3YXAKICAgIGR1cAogICAgaW50IDEwOAogICAgZXh0cmFjdF91aW50MTYKICAgIGRpZyAxCiAgICB1bmNvdmVyIDMKICAgIHVuY292ZXIgMgogICAgc3Vic3RyaW5nMwogICAgYnl0ZSAweDAwMDc1MzQ4NDk1MDUwNDU0NAogICAgPT0KICAgIGFzc2VydCAvLyBQcm9kdWN0IGlzIG5vdCBpbiBzaGlwcGVkIHN0YXRlIQogICAgZHVwCiAgICBpbnQgMTEyCiAgICBleHRyYWN0X3VpbnQxNgogICAgc3dhcAogICAgZHVwCiAgICBsZW4KICAgIHN3YXAKICAgIGR1cAogICAgZGlnIDMKICAgIHVuY292ZXIgMwogICAgc3Vic3RyaW5nMwogICAgc3dhcAogICAgZHVwCiAgICBpbnQgMTEwCiAgICBleHRyYWN0X3VpbnQxNgogICAgc3dhcAogICAgaW50IDAKICAgIGRpZyAyCiAgICBleHRyYWN0MwogICAgZGlnIDIKICAgIGNvbmNhdAogICAgZGlnIDIKICAgIGNvbmNhdAogICAgc3dhcAogICAgdW5jb3ZlciAzCiAgICBzd2FwCiAgICAtCiAgICBjb3ZlciAyCiAgICBzd2FwCiAgICBsZW4KICAgIGRpZyAxCiAgICBpbnQgMTEyCiAgICBleHRyYWN0X3VpbnQxNgogICAgKwogICAgdW5jb3ZlciAyCiAgICAtCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgcmVwbGFjZTIgMTEyCiAgICBkdXAKICAgIGludCAxMDgKICAgIGV4dHJhY3RfdWludDE2CiAgICBkaWcgMQogICAgaW50IDAKICAgIGRpZyAyCiAgICBleHRyYWN0MwogICAgc3dhcAogICAgZGlnIDIKICAgIGludCAxMTAKICAgIGV4dHJhY3RfdWludDE2CiAgICBzd2FwCiAgICBkaWcgMwogICAgbGVuCiAgICBzd2FwCiAgICB1bmNvdmVyIDQKICAgIGRpZyAzCiAgICB1bmNvdmVyIDMKICAgIHN1YnN0cmluZzMKICAgIHVuY292ZXIgMwogICAgZnJhbWVfZGlnIC0xCiAgICBjb25jYXQKICAgIHN3YXAKICAgIGNvbmNhdAogICAgY292ZXIgMgogICAgLQogICAgc3dhcAogICAgZnJhbWVfZGlnIC0xCiAgICBsZW4KICAgIGRpZyAxCiAgICBpbnQgMTEwCiAgICBleHRyYWN0X3VpbnQxNgogICAgZGlnIDEKICAgICsKICAgIGRpZyAzCiAgICAtCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgdW5jb3ZlciAyCiAgICBzd2FwCiAgICByZXBsYWNlMiAxMTAKICAgIGR1cAogICAgaW50IDExMgogICAgZXh0cmFjdF91aW50MTYKICAgIHVuY292ZXIgMgogICAgKwogICAgdW5jb3ZlciAyCiAgICAtCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgcmVwbGFjZTIgMTEyCiAgICBkdXAKICAgIGludCAxMAogICAgZXh0cmFjdF91aW50MTYKICAgIGRpZyAxCiAgICBpbnQgMAogICAgZGlnIDIKICAgIGV4dHJhY3QzCiAgICBzd2FwCiAgICBkaWcgMgogICAgaW50IDEwOAogICAgZXh0cmFjdF91aW50MTYKICAgIHN3YXAKICAgIGRpZyAzCiAgICBsZW4KICAgIHN3YXAKICAgIHVuY292ZXIgNAogICAgZGlnIDMKICAgIHVuY292ZXIgMwogICAgc3Vic3RyaW5nMwogICAgdW5jb3ZlciAzCiAgICBieXRlIDB4MDAwOTQ0NDU0YzQ5NTY0NTUyNDU0NAogICAgY29uY2F0CiAgICBzd2FwCiAgICBjb25jYXQKICAgIGNvdmVyIDIKICAgIC0KICAgIHN3YXAKICAgIGR1cAogICAgaW50IDEwOAogICAgZXh0cmFjdF91aW50MTYKICAgIGludCAxMQogICAgKwogICAgZGlnIDIKICAgIC0KICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICByZXBsYWNlMiAxMDgKICAgIGR1cAogICAgaW50IDExMAogICAgZXh0cmFjdF91aW50MTYKICAgIGludCAxMQogICAgKwogICAgZGlnIDIKICAgIC0KICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICByZXBsYWNlMiAxMTAKICAgIGR1cAogICAgaW50IDExMgogICAgZXh0cmFjdF91aW50MTYKICAgIGludCAxMQogICAgKwogICAgdW5jb3ZlciAyCiAgICAtCiAgICBpdG9iCiAgICBleHRyYWN0IDYgMgogICAgcmVwbGFjZTIgMTEyCiAgICBkdXAKICAgIGV4dHJhY3QgMCA4IC8vIG9uIGVycm9yOiBJbmRleCBhY2Nlc3MgaXMgb3V0IG9mIGJvdW5kcwogICAgc3dhcAogICAgZHVwCiAgICBpbnQgMTEyCiAgICBleHRyYWN0X3VpbnQxNgogICAgc3dhcAogICAgZHVwCiAgICBsZW4KICAgIHN3YXAKICAgIGR1cAogICAgdW5jb3ZlciAzCiAgICB1bmNvdmVyIDMKICAgIHN1YnN0cmluZzMKICAgIHVuY292ZXIgMgogICAgYnl0ZSAweDAwMTQKICAgIGNvbmNhdAogICAgc3dhcAogICAgZHVwCiAgICBsZW4KICAgIGludCAyMAogICAgKwogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIHVuY292ZXIgMgogICAgc3dhcAogICAgY29uY2F0CiAgICB1bmNvdmVyIDMKICAgIGNvbmNhdAogICAgc3dhcAogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTEKICAgIGNvbmNhdAogICAgY2FsbHN1YiBzYXZlX2hpc3RvcnkKICAgIHBvcAogICAgY2FsbHN1YiB1cGRhdGVfcHJvZHVjdAogICAgZXh0cmFjdCAwIDggLy8gb24gZXJyb3I6IEluZGV4IGFjY2VzcyBpcyBvdXQgb2YgYm91bmRzCiAgICBieXRlIDB4MDAwYQogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTEKICAgIGNvbmNhdAogICAgbG9nCiAgICByZXRzdWIKCgovLyBzbWFydF9jb250cmFjdHMuaGViYV9jaGFpbi5jb250cmFjdC5IZWJhQ2hhaW4uZ2V0X3Byb2R1Y3RfaGlzdG9yeShwcm9kdWN0X2lkOiBieXRlcykgLT4gYnl0ZXM6CmdldF9wcm9kdWN0X2hpc3Rvcnk6CiAgICBwcm90byAxIDEKICAgIGZyYW1lX2RpZyAtMQogICAgYnRvaQogICAgY2FsbHN1YiBnZXRfaGlzdG9yeQogICAgcmV0c3ViCgoKLy8gc21hcnRfY29udHJhY3RzLmhlYmFfY2hhaW4uY29udHJhY3QuSGViYUNoYWluLmdldF9oaXN0b3J5KHByb2R1Y3RfaWQ6IHVpbnQ2NCkgLT4gYnl0ZXM6CmdldF9oaXN0b3J5OgogICAgcHJvdG8gMSAxCiAgICBieXRlIDB4Njg2OTczNzQ2ZjcyNzk1ZgogICAgYm94X2dldAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYuaGlzdG9yaWVzIGV4aXN0cwogICAgZHVwCiAgICBleHRyYWN0IDIgMAogICAgc3dhcAogICAgaW50IDAKICAgIGV4dHJhY3RfdWludDE2CiAgICBmcmFtZV9kaWcgLTEKICAgID4KICAgIGFzc2VydCAvLyBJbmRleCBhY2Nlc3MgaXMgb3V0IG9mIGJvdW5kcwogICAgZnJhbWVfZGlnIC0xCiAgICBpbnQgMgogICAgKgogICAgZGlnIDEKICAgIHN3YXAKICAgIGV4dHJhY3RfdWludDE2CiAgICBkdXAyCiAgICBleHRyYWN0X3VpbnQxNgogICAgaW50IDIKICAgICsKICAgIGV4dHJhY3QzCiAgICBleHRyYWN0IDIgMAogICAgcmV0c3ViCgoKLy8gc21hcnRfY29udHJhY3RzLmhlYmFfY2hhaW4uY29udHJhY3QuSGViYUNoYWluLmdldF9wcm9kdWN0cygpIC0+IGJ5dGVzOgpnZXRfcHJvZHVjdHM6CiAgICBwcm90byAwIDEKICAgIGJ5dGUgMHg3MDcyNmY2NDc1NjM3NDVmCiAgICBib3hfZ2V0CiAgICBhc3NlcnQgLy8gY2hlY2sgc2VsZi5wcm9kdWN0cyBleGlzdHMKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5oZWJhX2NoYWluLmNvbnRyYWN0LkhlYmFDaGFpbi5fX2luaXRfXygpIC0+IHZvaWQ6Cl9faW5pdF9fOgogICAgcHJvdG8gMCAwCiAgICBieXRlICJ0b3RhbF9wcm9kdWN0IgogICAgaW50IDAKICAgIGFwcF9nbG9iYWxfcHV0CiAgICByZXRzdWIKCgovLyBfcHV5YV9saWIuYXJjNC5keW5hbWljX2FycmF5X3JlcGxhY2VfYnl0ZV9sZW5ndGhfaGVhZChhcnJheTogYnl0ZXMsIG5ld19pdGVtOiBieXRlcywgaW5kZXg6IHVpbnQ2NCkgLT4gYnl0ZXM6CmR5bmFtaWNfYXJyYXlfcmVwbGFjZV9ieXRlX2xlbmd0aF9oZWFkOgogICAgcHJvdG8gMyAxCiAgICBmcmFtZV9kaWcgLTMKICAgIHN1YnN0cmluZyAwIDIKICAgIGR1cAogICAgYnRvaQogICAgZnJhbWVfZGlnIC0zCiAgICBleHRyYWN0IDIgMAogICAgZnJhbWVfZGlnIC0yCiAgICBmcmFtZV9kaWcgLTEKICAgIHVuY292ZXIgMwogICAgY2FsbHN1YiBzdGF0aWNfYXJyYXlfcmVwbGFjZV9ieXRlX2xlbmd0aF9oZWFkCiAgICBjb25jYXQKICAgIHJldHN1YgoKCi8vIF9wdXlhX2xpYi5hcmM0LnN0YXRpY19hcnJheV9yZXBsYWNlX2J5dGVfbGVuZ3RoX2hlYWQoYXJyYXlfaGVhZF9hbmRfdGFpbDogYnl0ZXMsIG5ld19pdGVtOiBieXRlcywgaW5kZXg6IHVpbnQ2NCwgYXJyYXlfbGVuZ3RoOiB1aW50NjQpIC0+IGJ5dGVzOgpzdGF0aWNfYXJyYXlfcmVwbGFjZV9ieXRlX2xlbmd0aF9oZWFkOgogICAgcHJvdG8gNCAxCiAgICBmcmFtZV9kaWcgLTIKICAgIGZyYW1lX2RpZyAtMQogICAgPAogICAgYXNzZXJ0IC8vIEluZGV4IG91dCBvZiBib3VuZHMKICAgIGZyYW1lX2RpZyAtMgogICAgaW50IDIKICAgICoKICAgIGZyYW1lX2RpZyAtNAogICAgc3dhcAogICAgZXh0cmFjdF91aW50MTYKICAgIGZyYW1lX2RpZyAtNAogICAgZGlnIDEKICAgIGV4dHJhY3RfdWludDE2CiAgICBkaWcgMQogICAgKwogICAgaW50IDIKICAgICsKICAgIHN3YXAKICAgIGZyYW1lX2RpZyAtNAogICAgaW50IDAKICAgIHVuY292ZXIgMgogICAgc3Vic3RyaW5nMwogICAgZnJhbWVfZGlnIC0zCiAgICBjb25jYXQKICAgIGZyYW1lX2RpZyAtNAogICAgbGVuCiAgICBmcmFtZV9kaWcgLTQKICAgIHVuY292ZXIgMwogICAgdW5jb3ZlciAyCiAgICBzdWJzdHJpbmczCiAgICBjb25jYXQKICAgIGZyYW1lX2RpZyAtMQogICAgZnJhbWVfZGlnIC0yCiAgICBjYWxsc3ViIHJlY2FsY3VsYXRlX2hlYWRfZm9yX2VsZW1lbnRzX3dpdGhfYnl0ZV9sZW5ndGhfaGVhZAogICAgcmV0c3ViCgoKLy8gX3B1eWFfbGliLmFyYzQucmVjYWxjdWxhdGVfaGVhZF9mb3JfZWxlbWVudHNfd2l0aF9ieXRlX2xlbmd0aF9oZWFkKGFycmF5X2hlYWRfYW5kX3RhaWw6IGJ5dGVzLCBsZW5ndGg6IHVpbnQ2NCwgc3RhcnRfYXRfaW5kZXg6IHVpbnQ2NCkgLT4gYnl0ZXM6CnJlY2FsY3VsYXRlX2hlYWRfZm9yX2VsZW1lbnRzX3dpdGhfYnl0ZV9sZW5ndGhfaGVhZDoKICAgIHByb3RvIDMgMQogICAgZnJhbWVfZGlnIC0yCiAgICBpbnQgMgogICAgKgogICAgZHVwCiAgICBmcmFtZV9kaWcgLTEKICAgIGludCAyCiAgICAqCiAgICBkdXAKICAgIGNvdmVyIDIKICAgIGZyYW1lX2RpZyAtMwogICAgc3dhcAogICAgZXh0cmFjdF91aW50MTYKICAgIGZyYW1lX2RpZyAtMQogICAgc2VsZWN0CgpyZWNhbGN1bGF0ZV9oZWFkX2Zvcl9lbGVtZW50c193aXRoX2J5dGVfbGVuZ3RoX2hlYWRfZm9yX2hlYWRlckAxOgogICAgZnJhbWVfZGlnIDEKICAgIGZyYW1lX2RpZyAwCiAgICA8CiAgICBieiByZWNhbGN1bGF0ZV9oZWFkX2Zvcl9lbGVtZW50c193aXRoX2J5dGVfbGVuZ3RoX2hlYWRfYWZ0ZXJfZm9yQDQKICAgIGZyYW1lX2RpZyAyCiAgICBkdXAKICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICBmcmFtZV9kaWcgLTMKICAgIGZyYW1lX2RpZyAxCiAgICBkdXAKICAgIGNvdmVyIDQKICAgIHVuY292ZXIgMgogICAgcmVwbGFjZTMKICAgIGR1cAogICAgZnJhbWVfYnVyeSAtMwogICAgZGlnIDEKICAgIGV4dHJhY3RfdWludDE2CiAgICBpbnQgMgogICAgKwogICAgKwogICAgZnJhbWVfYnVyeSAyCiAgICBpbnQgMgogICAgKwogICAgZnJhbWVfYnVyeSAxCiAgICBiIHJlY2FsY3VsYXRlX2hlYWRfZm9yX2VsZW1lbnRzX3dpdGhfYnl0ZV9sZW5ndGhfaGVhZF9mb3JfaGVhZGVyQDEKCnJlY2FsY3VsYXRlX2hlYWRfZm9yX2VsZW1lbnRzX3dpdGhfYnl0ZV9sZW5ndGhfaGVhZF9hZnRlcl9mb3JANDoKICAgIGZyYW1lX2RpZyAtMwogICAgZnJhbWVfYnVyeSAwCiAgICByZXRzdWIK",
         "clear": "I3ByYWdtYSB2ZXJzaW9uIDEwCgpzbWFydF9jb250cmFjdHMuaGViYV9jaGFpbi5jb250cmFjdC5IZWJhQ2hhaW4uY2xlYXJfc3RhdGVfcHJvZ3JhbToKICAgIGludCAxCiAgICByZXR1cm4K"
     },
     "state": {
         "global": {
             "num_byte_slices": 0,
-            "num_uints": 0
+            "num_uints": 1
         },
         "local": {
             "num_byte_slices": 0,
@@ -45,7 +93,12 @@ _APP_SPEC_JSON = r"""{
     },
     "schema": {
         "global": {
-            "declared": {},
+            "declared": {
+                "total_product": {
+                    "type": "uint64",
+                    "key": "total_product"
+                }
+            },
             "reserved": {}
         },
         "local": {
@@ -57,15 +110,114 @@ _APP_SPEC_JSON = r"""{
         "name": "HebaChain",
         "methods": [
             {
-                "name": "hello",
+                "name": "add_product",
                 "args": [
                     {
                         "type": "string",
                         "name": "name"
+                    },
+                    {
+                        "type": "address",
+                        "name": "customer"
+                    },
+                    {
+                        "type": "address",
+                        "name": "intermediary"
+                    },
+                    {
+                        "type": "string",
+                        "name": "condition"
+                    },
+                    {
+                        "type": "string",
+                        "name": "current_location"
+                    },
+                    {
+                        "type": "string",
+                        "name": "delivery_location"
                     }
                 ],
                 "returns": {
-                    "type": "string"
+                    "type": "void"
+                }
+            },
+            {
+                "name": "ship_product",
+                "args": [
+                    {
+                        "type": "uint64",
+                        "name": "product_id"
+                    },
+                    {
+                        "type": "string",
+                        "name": "condition"
+                    },
+                    {
+                        "type": "string",
+                        "name": "location"
+                    },
+                    {
+                        "type": "uint64",
+                        "name": "delivery_date"
+                    }
+                ],
+                "returns": {
+                    "type": "void"
+                }
+            },
+            {
+                "name": "alter_product",
+                "args": [
+                    {
+                        "type": "uint64",
+                        "name": "product_id"
+                    },
+                    {
+                        "type": "string",
+                        "name": "condition"
+                    },
+                    {
+                        "type": "string",
+                        "name": "location"
+                    }
+                ],
+                "returns": {
+                    "type": "void"
+                }
+            },
+            {
+                "name": "deliver_product",
+                "args": [
+                    {
+                        "type": "uint64",
+                        "name": "product_id"
+                    },
+                    {
+                        "type": "string",
+                        "name": "condition"
+                    }
+                ],
+                "returns": {
+                    "type": "void"
+                }
+            },
+            {
+                "name": "get_product_history",
+                "args": [
+                    {
+                        "type": "uint64",
+                        "name": "product_id"
+                    }
+                ],
+                "returns": {
+                    "type": "(uint64,string,string,uint64)"
+                }
+            },
+            {
+                "name": "get_products",
+                "args": [],
+                "returns": {
+                    "type": "byte[]"
                 }
             }
         ],
@@ -149,12 +301,79 @@ def _convert_deploy_args(
 
 
 @dataclasses.dataclass(kw_only=True)
-class HelloArgs(_ArgsBase[str]):
+class AddProductArgs(_ArgsBase[None]):
     name: str
+    customer: str
+    intermediary: str
+    condition: str
+    current_location: str
+    delivery_location: str
 
     @staticmethod
     def method() -> str:
-        return "hello(string)string"
+        return "add_product(string,address,address,string,string,string)void"
+
+
+@dataclasses.dataclass(kw_only=True)
+class ShipProductArgs(_ArgsBase[None]):
+    product_id: int
+    condition: str
+    location: str
+    delivery_date: int
+
+    @staticmethod
+    def method() -> str:
+        return "ship_product(uint64,string,string,uint64)void"
+
+
+@dataclasses.dataclass(kw_only=True)
+class AlterProductArgs(_ArgsBase[None]):
+    product_id: int
+    condition: str
+    location: str
+
+    @staticmethod
+    def method() -> str:
+        return "alter_product(uint64,string,string)void"
+
+
+@dataclasses.dataclass(kw_only=True)
+class DeliverProductArgs(_ArgsBase[None]):
+    product_id: int
+    condition: str
+
+    @staticmethod
+    def method() -> str:
+        return "deliver_product(uint64,string)void"
+
+
+@dataclasses.dataclass(kw_only=True)
+class History:
+    product_id: int
+    location: str
+    condition: str
+    timestamp: int
+
+
+@dataclasses.dataclass(kw_only=True)
+class GetProductHistoryArgs(_ArgsBase[History]):
+    product_id: int
+
+    @staticmethod
+    def method() -> str:
+        return "get_product_history(uint64)(uint64,string,string,uint64)"
+
+
+@dataclasses.dataclass(kw_only=True)
+class GetProductsArgs(_ArgsBase[bytes | bytearray]):
+    @staticmethod
+    def method() -> str:
+        return "get_products()byte[]"
+
+
+class GlobalState:
+    def __init__(self, data: dict[bytes, bytes | int]):
+        self.total_product = typing.cast(int, data.get(b"total_product"))
 
 
 @dataclasses.dataclass(kw_only=True)
@@ -188,21 +407,165 @@ class Composer:
     def execute(self) -> AtomicTransactionResponse:
         return self.app_client.execute_atc(self.atc)
 
-    def hello(
+    def add_product(
         self,
         *,
         name: str,
+        customer: str,
+        intermediary: str,
+        condition: str,
+        current_location: str,
+        delivery_location: str,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> "Composer":
-        """Adds a call to `hello(string)string` ABI method
+        """Adds a call to `add_product(string,address,address,string,string,string)void` ABI method
         
         :param str name: The `name` ABI parameter
+        :param str customer: The `customer` ABI parameter
+        :param str intermediary: The `intermediary` ABI parameter
+        :param str condition: The `condition` ABI parameter
+        :param str current_location: The `current_location` ABI parameter
+        :param str delivery_location: The `delivery_location` ABI parameter
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns Composer: This Composer instance"""
 
-        args = HelloArgs(
+        args = AddProductArgs(
             name=name,
+            customer=customer,
+            intermediary=intermediary,
+            condition=condition,
+            current_location=current_location,
+            delivery_location=delivery_location,
         )
+        self.app_client.compose_call(
+            self.atc,
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return self
+
+    def ship_product(
+        self,
+        *,
+        product_id: int,
+        condition: str,
+        location: str,
+        delivery_date: int,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> "Composer":
+        """Adds a call to `ship_product(uint64,string,string,uint64)void` ABI method
+        
+        :param int product_id: The `product_id` ABI parameter
+        :param str condition: The `condition` ABI parameter
+        :param str location: The `location` ABI parameter
+        :param int delivery_date: The `delivery_date` ABI parameter
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns Composer: This Composer instance"""
+
+        args = ShipProductArgs(
+            product_id=product_id,
+            condition=condition,
+            location=location,
+            delivery_date=delivery_date,
+        )
+        self.app_client.compose_call(
+            self.atc,
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return self
+
+    def alter_product(
+        self,
+        *,
+        product_id: int,
+        condition: str,
+        location: str,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> "Composer":
+        """Adds a call to `alter_product(uint64,string,string)void` ABI method
+        
+        :param int product_id: The `product_id` ABI parameter
+        :param str condition: The `condition` ABI parameter
+        :param str location: The `location` ABI parameter
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns Composer: This Composer instance"""
+
+        args = AlterProductArgs(
+            product_id=product_id,
+            condition=condition,
+            location=location,
+        )
+        self.app_client.compose_call(
+            self.atc,
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return self
+
+    def deliver_product(
+        self,
+        *,
+        product_id: int,
+        condition: str,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> "Composer":
+        """Adds a call to `deliver_product(uint64,string)void` ABI method
+        
+        :param int product_id: The `product_id` ABI parameter
+        :param str condition: The `condition` ABI parameter
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns Composer: This Composer instance"""
+
+        args = DeliverProductArgs(
+            product_id=product_id,
+            condition=condition,
+        )
+        self.app_client.compose_call(
+            self.atc,
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return self
+
+    def get_product_history(
+        self,
+        *,
+        product_id: int,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> "Composer":
+        """Adds a call to `get_product_history(uint64)(uint64,string,string,uint64)` ABI method
+        
+        :param int product_id: The `product_id` ABI parameter
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns Composer: This Composer instance"""
+
+        args = GetProductHistoryArgs(
+            product_id=product_id,
+        )
+        self.app_client.compose_call(
+            self.atc,
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return self
+
+    def get_products(
+        self,
+        *,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> "Composer":
+        """Adds a call to `get_products()byte[]` ABI method
+        
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns Composer: This Composer instance"""
+
+        args = GetProductsArgs()
         self.app_client.compose_call(
             self.atc,
             call_abi_method=args.method(),
@@ -370,21 +733,169 @@ class HebaChainClient:
     def suggested_params(self, value: algosdk.transaction.SuggestedParams | None) -> None:
         self.app_client.suggested_params = value
 
-    def hello(
+    def get_global_state(self) -> GlobalState:
+        """Returns the application's global state wrapped in a strongly typed class with options to format the stored value"""
+
+        state = typing.cast(dict[bytes, bytes | int], self.app_client.get_global_state(raw=True))
+        return GlobalState(state)
+
+    def add_product(
         self,
         *,
         name: str,
+        customer: str,
+        intermediary: str,
+        condition: str,
+        current_location: str,
+        delivery_location: str,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
-    ) -> algokit_utils.ABITransactionResponse[str]:
-        """Calls `hello(string)string` ABI method
+    ) -> algokit_utils.ABITransactionResponse[None]:
+        """Calls `add_product(string,address,address,string,string,string)void` ABI method
         
         :param str name: The `name` ABI parameter
+        :param str customer: The `customer` ABI parameter
+        :param str intermediary: The `intermediary` ABI parameter
+        :param str condition: The `condition` ABI parameter
+        :param str current_location: The `current_location` ABI parameter
+        :param str delivery_location: The `delivery_location` ABI parameter
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
-        :returns algokit_utils.ABITransactionResponse[str]: The result of the transaction"""
+        :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
 
-        args = HelloArgs(
+        args = AddProductArgs(
             name=name,
+            customer=customer,
+            intermediary=intermediary,
+            condition=condition,
+            current_location=current_location,
+            delivery_location=delivery_location,
         )
+        result = self.app_client.call(
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return result
+
+    def ship_product(
+        self,
+        *,
+        product_id: int,
+        condition: str,
+        location: str,
+        delivery_date: int,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> algokit_utils.ABITransactionResponse[None]:
+        """Calls `ship_product(uint64,string,string,uint64)void` ABI method
+        
+        :param int product_id: The `product_id` ABI parameter
+        :param str condition: The `condition` ABI parameter
+        :param str location: The `location` ABI parameter
+        :param int delivery_date: The `delivery_date` ABI parameter
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
+
+        args = ShipProductArgs(
+            product_id=product_id,
+            condition=condition,
+            location=location,
+            delivery_date=delivery_date,
+        )
+        result = self.app_client.call(
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return result
+
+    def alter_product(
+        self,
+        *,
+        product_id: int,
+        condition: str,
+        location: str,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> algokit_utils.ABITransactionResponse[None]:
+        """Calls `alter_product(uint64,string,string)void` ABI method
+        
+        :param int product_id: The `product_id` ABI parameter
+        :param str condition: The `condition` ABI parameter
+        :param str location: The `location` ABI parameter
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
+
+        args = AlterProductArgs(
+            product_id=product_id,
+            condition=condition,
+            location=location,
+        )
+        result = self.app_client.call(
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return result
+
+    def deliver_product(
+        self,
+        *,
+        product_id: int,
+        condition: str,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> algokit_utils.ABITransactionResponse[None]:
+        """Calls `deliver_product(uint64,string)void` ABI method
+        
+        :param int product_id: The `product_id` ABI parameter
+        :param str condition: The `condition` ABI parameter
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
+
+        args = DeliverProductArgs(
+            product_id=product_id,
+            condition=condition,
+        )
+        result = self.app_client.call(
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return result
+
+    def get_product_history(
+        self,
+        *,
+        product_id: int,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> algokit_utils.ABITransactionResponse[History]:
+        """Calls `get_product_history(uint64)(uint64,string,string,uint64)` ABI method
+        
+        :param int product_id: The `product_id` ABI parameter
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns algokit_utils.ABITransactionResponse[History]: The result of the transaction"""
+
+        args = GetProductHistoryArgs(
+            product_id=product_id,
+        )
+        result = self.app_client.call(
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        elements = self.app_spec.hints[args.method()].structs["output"]["elements"]
+        result_dict = {element[0]: value for element, value in zip(elements, result.return_value)}
+        result.return_value = History(**result_dict)
+        return result
+
+    def get_products(
+        self,
+        *,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> algokit_utils.ABITransactionResponse[bytes | bytearray]:
+        """Calls `get_products()byte[]` ABI method
+        
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns algokit_utils.ABITransactionResponse[bytes | bytearray]: The result of the transaction"""
+
+        args = GetProductsArgs()
         result = self.app_client.call(
             call_abi_method=args.method(),
             transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
