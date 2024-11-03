@@ -1,0 +1,610 @@
+#pragma version 10
+
+smart_contracts.heba_chain_product_history.contract.HebaChainProductHistory.approval_program:
+    callsub __puya_arc4_router__
+    return
+
+
+// smart_contracts.heba_chain_product_history.contract.HebaChainProductHistory.__puya_arc4_router__() -> uint64:
+__puya_arc4_router__:
+    proto 0 1
+    txn NumAppArgs
+    bz __puya_arc4_router___bare_routing@6
+    method "get_product_history(uint64)(uint64,string,string,uint64)[]"
+    method "save_product_history(uint64,string,string)void"
+    txna ApplicationArgs 0
+    match __puya_arc4_router___get_product_history_route@2 __puya_arc4_router___save_product_history_route@3
+    int 0
+    retsub
+
+__puya_arc4_router___get_product_history_route@2:
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    txna ApplicationArgs 1
+    callsub get_product_history
+    byte 0x151f7c75
+    swap
+    concat
+    log
+    int 1
+    retsub
+
+__puya_arc4_router___save_product_history_route@3:
+    txn OnCompletion
+    !
+    assert // OnCompletion is NoOp
+    txn ApplicationID
+    assert // is not creating
+    txna ApplicationArgs 1
+    txna ApplicationArgs 2
+    txna ApplicationArgs 3
+    callsub save_product_history
+    int 1
+    retsub
+
+__puya_arc4_router___bare_routing@6:
+    txn OnCompletion
+    bnz __puya_arc4_router___after_if_else@10
+    txn ApplicationID
+    !
+    assert // is creating
+    int 1
+    retsub
+
+__puya_arc4_router___after_if_else@10:
+    int 0
+    retsub
+
+
+// smart_contracts.heba_chain_product_history.contract.HebaChainProductHistory.get_product_history(product_id: bytes) -> bytes:
+get_product_history:
+    proto 1 1
+    frame_dig -1
+    btoi
+    callsub get_history
+    retsub
+
+
+// smart_contracts.heba_chain_product_history.contract.HebaChainProductHistory.get_history(product_id: uint64) -> bytes:
+get_history:
+    proto 1 1
+    byte ""
+    byte 0x686973746f72795f
+    box_get
+    assert // check self.histories exists
+    dup
+    extract 2 0
+    frame_dig -1
+    int 2
+    *
+    dig 1
+    swap
+    extract_uint16
+    cover 2
+    swap
+    int 0
+    extract_uint16
+    frame_dig -1
+    int 1
+    +
+    dup
+    cover 2
+    - // on error: Index access is out of bounds
+    swap
+    dig 2
+    len
+    cover 2
+    int 2
+    *
+    dig 3
+    swap
+    extract_uint16
+    swap
+    select
+    swap
+    cover 2
+    substring3
+    dup
+    int 1
+    bzero
+    swap
+    int 0
+    extract_uint16
+    int 0
+
+get_history_for_header@1:
+    frame_dig 4
+    frame_dig 3
+    <
+    dup
+    frame_bury 0
+    bz get_history_after_for@4
+    frame_dig 1
+    extract 2 0
+    frame_dig 0
+    assert // Index access is out of bounds
+    frame_dig 4
+    dup
+    cover 2
+    int 2
+    *
+    dig 1
+    swap
+    extract_uint16
+    dup2
+    extract_uint16
+    int 2
+    +
+    extract3
+    extract 2 0
+    byte 0x0002
+    swap
+    concat
+    frame_dig 2
+    dup
+    int 0
+    extract_uint16
+    swap
+    extract 2 0
+    int 1
+    uncover 3
+    callsub dynamic_array_concat_dynamic_element
+    frame_bury 2
+    int 1
+    +
+    frame_bury 4
+    b get_history_for_header@1
+
+get_history_after_for@4:
+    frame_dig 2
+    frame_bury 0
+    retsub
+
+
+// smart_contracts.heba_chain_product_history.contract.HebaChainProductHistory.save_product_history(product_id: bytes, current_location: bytes, condition: bytes) -> void:
+save_product_history:
+    proto 3 0
+    global LatestTimestamp
+    itob
+    frame_dig -3
+    byte 0x0014
+    concat
+    frame_dig -2
+    len
+    int 20
+    +
+    itob
+    extract 6 2
+    concat
+    swap
+    concat
+    frame_dig -2
+    concat
+    frame_dig -1
+    concat
+    callsub save_history
+    pop
+    retsub
+
+
+// smart_contracts.heba_chain_product_history.contract.HebaChainProductHistory.save_history(history: bytes) -> bytes:
+save_history:
+    proto 1 1
+    byte ""
+    dupn 3
+    byte 0x686973746f72795f
+    box_len
+    bury 1
+    bnz save_history_after_if_else@2
+    int 1
+    bzero
+    byte 0x686973746f72795f
+    box_del
+    pop
+    byte 0x686973746f72795f
+    swap
+    box_put
+
+save_history_after_if_else@2:
+    frame_dig -1
+    extract 0 8 // on error: Index access is out of bounds
+    btoi
+    dup
+    frame_bury 3
+    byte 0x686973746f72795f
+    box_get
+    assert // check self.histories exists
+    dup
+    extract 2 0
+    dig 2
+    int 2
+    *
+    dup
+    frame_bury 0
+    dig 1
+    swap
+    extract_uint16
+    cover 3
+    swap
+    int 0
+    extract_uint16
+    uncover 2
+    int 1
+    +
+    dup
+    frame_bury 1
+    dup
+    cover 2
+    - // on error: Index access is out of bounds
+    swap
+    dig 2
+    len
+    cover 2
+    int 2
+    *
+    dup
+    frame_bury 2
+    dig 3
+    swap
+    extract_uint16
+    swap
+    select
+    swap
+    cover 2
+    substring3
+    byte 0x0000
+    ==
+    bz save_history_after_if_else@4
+    byte 0x686973746f72795f
+    box_get
+    assert // check self.histories exists
+    int 1
+    bzero
+    frame_dig 3
+    callsub dynamic_array_replace_dynamic_element
+    byte 0x686973746f72795f
+    box_del
+    pop
+    byte 0x686973746f72795f
+    swap
+    box_put
+
+save_history_after_if_else@4:
+    byte 0x686973746f72795f
+    box_get
+    assert // check self.histories exists
+    dup
+    extract 2 0
+    dup
+    frame_dig 0
+    extract_uint16
+    cover 2
+    swap
+    int 0
+    extract_uint16
+    frame_dig 1
+    - // on error: Index access is out of bounds
+    dig 1
+    len
+    swap
+    dig 2
+    frame_dig 2
+    extract_uint16
+    swap
+    select
+    swap
+    cover 2
+    substring3
+    frame_dig -1
+    len
+    itob
+    extract 6 2
+    frame_dig -1
+    concat
+    int 1
+    callsub dynamic_array_concat_byte_length_head
+    byte 0x686973746f72795f
+    box_get
+    assert // check self.histories exists
+    swap
+    frame_dig 3
+    callsub dynamic_array_replace_dynamic_element
+    byte 0x686973746f72795f
+    box_del
+    pop
+    byte 0x686973746f72795f
+    swap
+    box_put
+    frame_dig -1
+    frame_bury 0
+    retsub
+
+
+// _puya_lib.arc4.dynamic_array_concat_byte_length_head(array: bytes, new_items_bytes: bytes, new_items_count: uint64) -> bytes:
+dynamic_array_concat_byte_length_head:
+    proto 3 1
+    frame_dig -3
+    int 0
+    extract_uint16
+    dup
+    frame_dig -1
+    +
+    swap
+    int 2
+    *
+    int 2
+    +
+    swap
+    dup
+    itob
+    extract 6 2
+    swap
+    frame_dig -3
+    int 2
+    dig 4
+    substring3
+    frame_dig -1
+    int 2
+    *
+    bzero
+    concat
+    frame_dig -3
+    len
+    frame_dig -3
+    uncover 5
+    uncover 2
+    substring3
+    concat
+    frame_dig -2
+    concat
+    swap
+    int 0
+    callsub recalculate_head_for_elements_with_byte_length_head
+    concat
+    retsub
+
+
+// _puya_lib.arc4.dynamic_array_concat_dynamic_element(array_items_count: uint64, array_head_and_tail: bytes, new_items_count: uint64, new_head_and_tail: bytes) -> bytes:
+dynamic_array_concat_dynamic_element:
+    proto 4 1
+    byte ""
+    byte 0x
+    frame_dig -2
+    int 2
+    *
+    frame_dig -4
+    int 2
+    *
+    int 0
+
+dynamic_array_concat_dynamic_element_for_header@1:
+    frame_dig 4
+    frame_dig 3
+    <
+    bz dynamic_array_concat_dynamic_element_after_for@4
+    frame_dig -3
+    frame_dig 4
+    dup
+    cover 2
+    extract_uint16
+    frame_dig 2
+    +
+    itob
+    extract 6 2
+    frame_dig 1
+    swap
+    concat
+    frame_bury 1
+    int 2
+    +
+    frame_bury 4
+    b dynamic_array_concat_dynamic_element_for_header@1
+
+dynamic_array_concat_dynamic_element_after_for@4:
+    frame_dig -3
+    len
+    frame_bury 0
+    int 0
+    frame_bury 4
+
+dynamic_array_concat_dynamic_element_for_header@5:
+    frame_dig 4
+    frame_dig 2
+    <
+    bz dynamic_array_concat_dynamic_element_after_for@8
+    frame_dig -1
+    frame_dig 4
+    dup
+    cover 2
+    extract_uint16
+    frame_dig 0
+    +
+    itob
+    extract 6 2
+    frame_dig 1
+    swap
+    concat
+    frame_bury 1
+    int 2
+    +
+    frame_bury 4
+    b dynamic_array_concat_dynamic_element_for_header@5
+
+dynamic_array_concat_dynamic_element_after_for@8:
+    frame_dig -4
+    frame_dig -2
+    +
+    itob
+    extract 6 2
+    frame_dig 1
+    concat
+    frame_dig -3
+    frame_dig 3
+    frame_dig 0
+    substring3
+    concat
+    frame_dig -1
+    len
+    frame_dig -1
+    frame_dig 2
+    uncover 2
+    substring3
+    concat
+    frame_bury 0
+    retsub
+
+
+// _puya_lib.arc4.dynamic_array_replace_dynamic_element(source: bytes, new_item: bytes, index: uint64) -> bytes:
+dynamic_array_replace_dynamic_element:
+    proto 3 1
+    frame_dig -3
+    substring 0 2
+    dup
+    btoi
+    frame_dig -3
+    extract 2 0
+    frame_dig -2
+    frame_dig -1
+    uncover 3
+    callsub static_array_replace_dynamic_element
+    concat
+    retsub
+
+
+// _puya_lib.arc4.static_array_replace_dynamic_element(array_head_and_tail: bytes, new_item: bytes, index: uint64, array_length: uint64) -> bytes:
+static_array_replace_dynamic_element:
+    proto 4 1
+    frame_dig -2
+    int 2
+    *
+    frame_dig -4
+    swap
+    extract_uint16
+    frame_dig -2
+    int 1
+    +
+    int 2
+    *
+    dup
+    cover 2
+    frame_dig -4
+    swap
+    extract_uint16
+    frame_dig -4
+    len
+    frame_dig -1
+    frame_dig -2
+    -
+    int 1
+    -
+    dig 1
+    uncover 3
+    uncover 2
+    select
+    dup
+    dig 3
+    -
+    cover 3
+    frame_dig -3
+    len
+    cover 3
+    frame_dig -4
+    int 0
+    uncover 4
+    substring3
+    frame_dig -3
+    concat
+    frame_dig -4
+    uncover 2
+    uncover 3
+    substring3
+    concat
+    frame_dig -1
+    int 2
+    *
+
+static_array_replace_dynamic_element_for_header@1:
+    frame_dig 0
+    frame_dig 4
+    <
+    bz static_array_replace_dynamic_element_after_for@4
+    frame_dig 3
+    dup
+    frame_dig 0
+    dup
+    cover 3
+    extract_uint16
+    frame_dig 2
+    +
+    frame_dig 1
+    -
+    itob
+    extract 6 2
+    dig 2
+    swap
+    replace3
+    frame_bury 3
+    int 2
+    +
+    frame_bury 0
+    b static_array_replace_dynamic_element_for_header@1
+
+static_array_replace_dynamic_element_after_for@4:
+    frame_dig 3
+    frame_bury 0
+    retsub
+
+
+// _puya_lib.arc4.recalculate_head_for_elements_with_byte_length_head(array_head_and_tail: bytes, length: uint64, start_at_index: uint64) -> bytes:
+recalculate_head_for_elements_with_byte_length_head:
+    proto 3 1
+    frame_dig -2
+    int 2
+    *
+    dup
+    frame_dig -1
+    int 2
+    *
+    dup
+    cover 2
+    frame_dig -3
+    swap
+    extract_uint16
+    frame_dig -1
+    select
+
+recalculate_head_for_elements_with_byte_length_head_for_header@1:
+    frame_dig 1
+    frame_dig 0
+    <
+    bz recalculate_head_for_elements_with_byte_length_head_after_for@4
+    frame_dig 2
+    dup
+    itob
+    extract 6 2
+    frame_dig -3
+    frame_dig 1
+    dup
+    cover 4
+    uncover 2
+    replace3
+    dup
+    frame_bury -3
+    dig 1
+    extract_uint16
+    int 2
+    +
+    +
+    frame_bury 2
+    int 2
+    +
+    frame_bury 1
+    b recalculate_head_for_elements_with_byte_length_head_for_header@1
+
+recalculate_head_for_elements_with_byte_length_head_after_for@4:
+    frame_dig -3
+    frame_bury 0
+    retsub

@@ -1,0 +1,126 @@
+/* App.css */
+
+.hc-hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #38b2ac;
+}
+
+.hc-hero-content {
+  text-align: center;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  max-width: 24rem;
+  background-color: #ffffff;
+  margin: 0 auto;
+}
+
+.hc-text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.hc-font-bold {
+  font-weight: 700;
+}
+
+.hc-py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.hc-grid {
+  display: grid;
+}
+
+.hc-btn {
+  margin: 0.5rem;
+}
+
+.hc-btn-primary {
+  background-color: #1a202c;
+  color: #fff;
+}
+
+.hc-divider {
+  border-top: 1px solid #e2e8f0;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hc-modal {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  z-index: 9999;
+  overflow: auto;
+}
+
+.hc-modal-open {
+  display: block;
+}
+
+.hc-modal-box {
+  margin: 2.5em auto;
+  background: #fff;
+  border-radius: 0.5em;
+  width: 40em;
+  max-width: 90vw;
+  padding: 1em;
+}
+
+.hc-font-bold {
+  font-weight: bold;
+}
+
+.hc-text-2xl {
+  font-size: 1.5rem;
+}
+
+.hc-m-2 {
+  margin: 0.5rem;
+}
+
+.hc-pt-5 {
+  padding-top: 1.25rem;
+}
+
+.hc-grid {
+  display: grid;
+}
+
+.hc-btn {
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #00aba2;
+  color: #fff;
+}
+
+.hc-btn-warning {
+  background-color: #d69e2e;
+}
+
+.hc-border-1 {
+  border-width: 1px;
+}
+
+.hc-border-teal-800 {
+  border-color: #2c7a7b;
+}
+
+.hc-modal-action {
+  display: grid;
+  margin-top: 1rem;
+}
+
+.hc-divider {
+  border-top: 1px solid #e2e8f0;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}

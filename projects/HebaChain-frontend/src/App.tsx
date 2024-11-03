@@ -6,6 +6,18 @@ import algosdk from 'algosdk'
 import { SnackbarProvider } from 'notistack'
 import Home from './Home'
 import { getAlgodConfigFromViteEnvironment, getKmdConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import Profile from "./profile/index"
+import Account from "./profile/account"
+import Add from "./profile/add"
+import Track from "./profile/track"
+import MyProduct from './profile/myproduct'
+import { ProductProvider } from './context/ProductContext'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 let providersArray: ProvidersArray
 if (import.meta.env.VITE_ALGOD_NETWORK === '') {
@@ -47,10 +59,42 @@ export default function App() {
     algosdkStatic: algosdk,
   })
 
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Home />,
+    },
+    {
+      path: "/profile",
+      element: <Profile />,
+      children: [
+        {
+          element: <Account />,
+          index: true,
+        },
+        {
+          path: "/profile/my-product",
+          element: <MyProduct />,
+        },
+        {
+          path: "/profile/add",
+          element: <Add />,
+        },
+        {
+          path: "/profile/track",
+          element: <Track />,
+        },
+      ]
+    }
+  ]);
+
   return (
     <SnackbarProvider maxSnack={3}>
       <WalletProvider value={walletProviders}>
-        <Home />
+        <ProductProvider>
+          <RouterProvider router={router} />
+          <ToastContainer />
+        </ProductProvider>
       </WalletProvider>
     </SnackbarProvider>
   )

@@ -1,0 +1,5 @@
+#pragma version 10
+
+smart_contracts.heba_chain_product_history.contract.HebaChainProductHistory.clear_state_program:
+    int 1
+    return

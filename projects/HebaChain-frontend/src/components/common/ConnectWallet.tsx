@@ -1,5 +1,5 @@
 import { Provider, useWallet } from '@txnlab/use-wallet'
-import Account from './Account'
+import Account from '../Account'
 
 interface ConnectWalletInterface {
   openModal: boolean
@@ -12,15 +12,15 @@ const ConnectWallet = ({ openModal, closeModal }: ConnectWalletInterface) => {
   const isKmd = (provider: Provider) => provider.metadata.name.toLowerCase() === 'kmd'
 
   return (
-    <dialog id="connect_wallet_modal" className={`modal ${openModal ? 'modal-open' : ''}`}style={{ display: openModal ? 'block' : 'none' }}>
-      <form method="dialog" className="modal-box">
-        <h3 className="font-bold text-2xl">Select wallet provider</h3>
+    <dialog id="hc-connect_wallet_modal" className={`modal ${openModal ? 'modal-open' : ''}`} style={{ display: openModal ? 'block' : 'none' }}>
+      <form method="dialog" className="hc-modal-box">
+        <h3 className="hc-font-bold hc-text-2xl">Select wallet provider</h3>
 
-        <div className="grid m-2 pt-5">
+        <div className="hc-grid hc-m-2 hc-pt-5">
           {activeAddress && (
             <>
               <Account />
-              <div className="divider" />
+              <div className="hc-divider" />
             </>
           )}
 
@@ -28,7 +28,7 @@ const ConnectWallet = ({ openModal, closeModal }: ConnectWalletInterface) => {
             providers?.map((provider) => (
               <button
                 data-test-id={`${provider.metadata.id}-connect`}
-                className="btn border-teal-800 border-1  m-2"
+                className="hc-btn hc-border-teal-800 hc-border-1 hc-m-2"
                 key={`provider-${provider.metadata.id}`}
                 onClick={() => {
                   return provider.connect()
@@ -46,10 +46,10 @@ const ConnectWallet = ({ openModal, closeModal }: ConnectWalletInterface) => {
             ))}
         </div>
 
-        <div className="modal-action grid">
+        <div className="hc-modal-action hc-grid">
           <button
             data-test-id="close-wallet-modal"
-            className="btn"
+            className="hc-btn"
             onClick={() => {
               closeModal()
             }}
@@ -58,7 +58,7 @@ const ConnectWallet = ({ openModal, closeModal }: ConnectWalletInterface) => {
           </button>
           {activeAddress && (
             <button
-              className="btn btn-warning"
+              className="hc-btn hc-btn-warning"
               data-test-id="logout"
               onClick={() => {
                 if (providers) {
