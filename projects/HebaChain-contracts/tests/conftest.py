@@ -16,8 +16,6 @@ from algosdk.v2client.algod import AlgodClient
 from algosdk.v2client.indexer import IndexerClient
 from dotenv import load_dotenv
 
-from smart_contracts.artifacts.heba_chain_product_history.heba_chain_product_history_client import HebaChainProductHistoryClient
-from smart_contracts.artifacts.game.game_client import GameClient
 from smart_contracts.artifacts.heba_chain.heba_chain_client import HebaChainClient
 
 
@@ -67,66 +65,6 @@ def customer(algod_client: AlgodClient) -> Account:
         "customer_demo_account",
         1_000_000
     )
-
-
-@pytest.fixture(scope="session")
-def heba_chain_product_history_client(account: Account, algod_client: AlgodClient, indexer_client: IndexerClient) -> HebaChainProductHistoryClient:
-    config.configure(
-        debug=True,
-        # trace_all=True,
-    )
-
-    client = HebaChainProductHistoryClient(
-        algod_client,
-        creator=account,
-        indexer_client=indexer_client,
-    )
-
-    client.deploy(
-        on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
-        on_update=algokit_utils.OnUpdate.AppendApp,
-    )
-
-    transfer(
-        algod_client,
-        TransferParameters(
-            from_account=account,
-            to_address=client.app_address,
-            micro_algos=100_000_000,
-        ),
-    )
-
-    return client
-
-
-@pytest.fixture(scope="session")
-def game_client(account: Account, algod_client: AlgodClient, indexer_client: IndexerClient) -> GameClient:
-    config.configure(
-        debug=True,
-        # trace_all=True,
-    )
-
-    client = GameClient(
-        algod_client,
-        creator=account,
-        indexer_client=indexer_client,
-    )
-
-    client.deploy(
-        on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
-        on_update=algokit_utils.OnUpdate.AppendApp,
-    )
-
-    transfer(
-        algod_client,
-        TransferParameters(
-            from_account=account,
-            to_address=client.app_address,
-            micro_algos=100_000_000,
-        ),
-    )
-
-    return client
 
 
 @pytest.fixture(scope="session")
