@@ -23,29 +23,55 @@ from algosdk.atomic_transaction_composer import (
 
 _APP_SPEC_JSON = r"""{
     "hints": {
-        "save_product_history(string,string,string,string)(string,string,string,string,uint64)": {
+        "register(string)(uint64,string,uint64)": {
             "structs": {
                 "output": {
-                    "name": "History",
+                    "name": "User",
                     "elements": [
                         [
-                            "id",
+                            "registered_at",
+                            "uint64"
+                        ],
+                        [
+                            "name",
                             "string"
                         ],
                         [
-                            "product_id",
+                            "balance",
+                            "uint64"
+                        ]
+                    ]
+                }
+            },
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "fund_account(pay)uint64": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "buy_asset(byte[],uint64)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "admin_upsert_asset((string,string,uint64))void": {
+            "structs": {
+                "asset": {
+                    "name": "GameAsset",
+                    "elements": [
+                        [
+                            "name",
                             "string"
                         ],
                         [
-                            "location",
+                            "description",
                             "string"
                         ],
                         [
-                            "condition",
-                            "string"
-                        ],
-                        [
-                            "timestamp",
+                            "price",
                             "uint64"
                         ]
                     ]
@@ -57,8 +83,8 @@ _APP_SPEC_JSON = r"""{
         }
     },
     "source": {
-        "approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCgpzbWFydF9jb250cmFjdHMuaGViYV9jaGFpbl9wcm9kdWN0X2hpc3RvcnkuY29udHJhY3QuSGViYUNoYWluUHJvZHVjdEhpc3RvcnkuYXBwcm92YWxfcHJvZ3JhbToKICAgIGNhbGxzdWIgX19wdXlhX2FyYzRfcm91dGVyX18KICAgIHJldHVybgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5oZWJhX2NoYWluX3Byb2R1Y3RfaGlzdG9yeS5jb250cmFjdC5IZWJhQ2hhaW5Qcm9kdWN0SGlzdG9yeS5fX3B1eWFfYXJjNF9yb3V0ZXJfXygpIC0+IHVpbnQ2NDoKX19wdXlhX2FyYzRfcm91dGVyX186CiAgICBwcm90byAwIDEKICAgIHR4biBOdW1BcHBBcmdzCiAgICBieiBfX3B1eWFfYXJjNF9yb3V0ZXJfX19iYXJlX3JvdXRpbmdANQogICAgbWV0aG9kICJzYXZlX3Byb2R1Y3RfaGlzdG9yeShzdHJpbmcsc3RyaW5nLHN0cmluZyxzdHJpbmcpKHN0cmluZyxzdHJpbmcsc3RyaW5nLHN0cmluZyx1aW50NjQpIgogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMAogICAgbWF0Y2ggX19wdXlhX2FyYzRfcm91dGVyX19fc2F2ZV9wcm9kdWN0X2hpc3Rvcnlfcm91dGVAMgogICAgaW50IDAKICAgIHJldHN1YgoKX19wdXlhX2FyYzRfcm91dGVyX19fc2F2ZV9wcm9kdWN0X2hpc3Rvcnlfcm91dGVAMjoKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgTm9PcAogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgIGFzc2VydCAvLyBpcyBub3QgY3JlYXRpbmcKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDEKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDIKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDMKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDQKICAgIGNhbGxzdWIgc2F2ZV9wcm9kdWN0X2hpc3RvcnkKICAgIGJ5dGUgMHgxNTFmN2M3NQogICAgc3dhcAogICAgY29uY2F0CiAgICBsb2cKICAgIGludCAxCiAgICByZXRzdWIKCl9fcHV5YV9hcmM0X3JvdXRlcl9fX2JhcmVfcm91dGluZ0A1OgogICAgdHhuIE9uQ29tcGxldGlvbgogICAgYm56IF9fcHV5YV9hcmM0X3JvdXRlcl9fX2FmdGVyX2lmX2Vsc2VAOQogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgICEKICAgIGFzc2VydCAvLyBpcyBjcmVhdGluZwogICAgaW50IDEKICAgIHJldHN1YgoKX19wdXlhX2FyYzRfcm91dGVyX19fYWZ0ZXJfaWZfZWxzZUA5OgogICAgaW50IDAKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5oZWJhX2NoYWluX3Byb2R1Y3RfaGlzdG9yeS5jb250cmFjdC5IZWJhQ2hhaW5Qcm9kdWN0SGlzdG9yeS5zYXZlX3Byb2R1Y3RfaGlzdG9yeShoaXN0b3J5X2lkOiBieXRlcywgcHJvZHVjdF9pZDogYnl0ZXMsIGN1cnJlbnRfbG9jYXRpb246IGJ5dGVzLCBjb25kaXRpb246IGJ5dGVzKSAtPiBieXRlczoKc2F2ZV9wcm9kdWN0X2hpc3Rvcnk6CiAgICBwcm90byA0IDEKICAgIGdsb2JhbCBMYXRlc3RUaW1lc3RhbXAKICAgIGl0b2IKICAgIGZyYW1lX2RpZyAtNAogICAgbGVuCiAgICBpbnQgMTYKICAgICsKICAgIGR1cAogICAgaXRvYgogICAgZXh0cmFjdCA2IDIKICAgIGJ5dGUgMHgwMDEwCiAgICBzd2FwCiAgICBjb25jYXQKICAgIHN3YXAKICAgIGZyYW1lX2RpZyAtMwogICAgbGVuCiAgICArCiAgICBkdXAKICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICB1bmNvdmVyIDIKICAgIHN3YXAKICAgIGNvbmNhdAogICAgc3dhcAogICAgZnJhbWVfZGlnIC0yCiAgICBsZW4KICAgICsKICAgIGl0b2IKICAgIGV4dHJhY3QgNiAyCiAgICBjb25jYXQKICAgIHN3YXAKICAgIGNvbmNhdAogICAgZnJhbWVfZGlnIC00CiAgICBjb25jYXQKICAgIGZyYW1lX2RpZyAtMwogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTIKICAgIGNvbmNhdAogICAgZnJhbWVfZGlnIC0xCiAgICBjb25jYXQKICAgIGNhbGxzdWIgc2F2ZV9oaXN0b3J5CiAgICBwb3AKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5oZWJhX2NoYWluX3Byb2R1Y3RfaGlzdG9yeS5jb250cmFjdC5IZWJhQ2hhaW5Qcm9kdWN0SGlzdG9yeS5zYXZlX2hpc3RvcnkoaGlzdG9yeTogYnl0ZXMpIC0+IGJ5dGVzLCBieXRlczoKc2F2ZV9oaXN0b3J5OgogICAgcHJvdG8gMSAyCiAgICBieXRlICJoaXN0b3JpZXMiCiAgICB0eG4gU2VuZGVyCiAgICBjb25jYXQKICAgIGR1cAogICAgYm94X2RlbAogICAgcG9wCiAgICBmcmFtZV9kaWcgLTEKICAgIGJveF9wdXQKICAgIGZyYW1lX2RpZyAtMQogICAgZHVwCiAgICByZXRzdWIK",
-        "clear": "I3ByYWdtYSB2ZXJzaW9uIDEwCgpzbWFydF9jb250cmFjdHMuaGViYV9jaGFpbl9wcm9kdWN0X2hpc3RvcnkuY29udHJhY3QuSGViYUNoYWluUHJvZHVjdEhpc3RvcnkuY2xlYXJfc3RhdGVfcHJvZ3JhbToKICAgIGludCAxCiAgICByZXR1cm4K"
+        "approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCgpzbWFydF9jb250cmFjdHMuZ2FtZS5jb250cmFjdC5HYW1lLmFwcHJvdmFsX3Byb2dyYW06CiAgICBjYWxsc3ViIF9fcHV5YV9hcmM0X3JvdXRlcl9fCiAgICByZXR1cm4KCgovLyBzbWFydF9jb250cmFjdHMuZ2FtZS5jb250cmFjdC5HYW1lLl9fcHV5YV9hcmM0X3JvdXRlcl9fKCkgLT4gdWludDY0OgpfX3B1eWFfYXJjNF9yb3V0ZXJfXzoKICAgIHByb3RvIDAgMQogICAgdHhuIE51bUFwcEFyZ3MKICAgIGJ6IF9fcHV5YV9hcmM0X3JvdXRlcl9fX2JhcmVfcm91dGluZ0A4CiAgICBtZXRob2QgInJlZ2lzdGVyKHN0cmluZykodWludDY0LHN0cmluZyx1aW50NjQpIgogICAgbWV0aG9kICJmdW5kX2FjY291bnQocGF5KXVpbnQ2NCIKICAgIG1ldGhvZCAiYnV5X2Fzc2V0KGJ5dGVbXSx1aW50NjQpdm9pZCIKICAgIG1ldGhvZCAiYWRtaW5fdXBzZXJ0X2Fzc2V0KChzdHJpbmcsc3RyaW5nLHVpbnQ2NCkpdm9pZCIKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDAKICAgIG1hdGNoIF9fcHV5YV9hcmM0X3JvdXRlcl9fX3JlZ2lzdGVyX3JvdXRlQDIgX19wdXlhX2FyYzRfcm91dGVyX19fZnVuZF9hY2NvdW50X3JvdXRlQDMgX19wdXlhX2FyYzRfcm91dGVyX19fYnV5X2Fzc2V0X3JvdXRlQDQgX19wdXlhX2FyYzRfcm91dGVyX19fYWRtaW5fdXBzZXJ0X2Fzc2V0X3JvdXRlQDUKICAgIGludCAwCiAgICByZXRzdWIKCl9fcHV5YV9hcmM0X3JvdXRlcl9fX3JlZ2lzdGVyX3JvdXRlQDI6CiAgICB0eG4gT25Db21wbGV0aW9uCiAgICAhCiAgICBhc3NlcnQgLy8gT25Db21wbGV0aW9uIGlzIE5vT3AKICAgIHR4biBBcHBsaWNhdGlvbklECiAgICBhc3NlcnQgLy8gaXMgbm90IGNyZWF0aW5nCiAgICB0eG5hIEFwcGxpY2F0aW9uQXJncyAxCiAgICBjYWxsc3ViIHJlZ2lzdGVyCiAgICBieXRlIDB4MTUxZjdjNzUKICAgIHN3YXAKICAgIGNvbmNhdAogICAgbG9nCiAgICBpbnQgMQogICAgcmV0c3ViCgpfX3B1eWFfYXJjNF9yb3V0ZXJfX19mdW5kX2FjY291bnRfcm91dGVAMzoKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgTm9PcAogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgIGFzc2VydCAvLyBpcyBub3QgY3JlYXRpbmcKICAgIHR4biBHcm91cEluZGV4CiAgICBpbnQgMQogICAgLQogICAgZHVwCiAgICBndHhucyBUeXBlRW51bQogICAgaW50IHBheQogICAgPT0KICAgIGFzc2VydCAvLyB0cmFuc2FjdGlvbiB0eXBlIGlzIHBheQogICAgY2FsbHN1YiBmdW5kX2FjY291bnQKICAgIGJ5dGUgMHgxNTFmN2M3NQogICAgc3dhcAogICAgY29uY2F0CiAgICBsb2cKICAgIGludCAxCiAgICByZXRzdWIKCl9fcHV5YV9hcmM0X3JvdXRlcl9fX2J1eV9hc3NldF9yb3V0ZUA0OgogICAgdHhuIE9uQ29tcGxldGlvbgogICAgIQogICAgYXNzZXJ0IC8vIE9uQ29tcGxldGlvbiBpcyBOb09wCiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgYXNzZXJ0IC8vIGlzIG5vdCBjcmVhdGluZwogICAgdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQogICAgZXh0cmFjdCAyIDAKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDIKICAgIGJ0b2kKICAgIGNhbGxzdWIgYnV5X2Fzc2V0CiAgICBpbnQgMQogICAgcmV0c3ViCgpfX3B1eWFfYXJjNF9yb3V0ZXJfX19hZG1pbl91cHNlcnRfYXNzZXRfcm91dGVANToKICAgIHR4biBPbkNvbXBsZXRpb24KICAgICEKICAgIGFzc2VydCAvLyBPbkNvbXBsZXRpb24gaXMgTm9PcAogICAgdHhuIEFwcGxpY2F0aW9uSUQKICAgIGFzc2VydCAvLyBpcyBub3QgY3JlYXRpbmcKICAgIHR4bmEgQXBwbGljYXRpb25BcmdzIDEKICAgIGNhbGxzdWIgYWRtaW5fdXBzZXJ0X2Fzc2V0CiAgICBpbnQgMQogICAgcmV0c3ViCgpfX3B1eWFfYXJjNF9yb3V0ZXJfX19iYXJlX3JvdXRpbmdAODoKICAgIHR4biBPbkNvbXBsZXRpb24KICAgIGJueiBfX3B1eWFfYXJjNF9yb3V0ZXJfX19hZnRlcl9pZl9lbHNlQDEyCiAgICB0eG4gQXBwbGljYXRpb25JRAogICAgIQogICAgYXNzZXJ0IC8vIGlzIGNyZWF0aW5nCiAgICBpbnQgMQogICAgcmV0c3ViCgpfX3B1eWFfYXJjNF9yb3V0ZXJfX19hZnRlcl9pZl9lbHNlQDEyOgogICAgaW50IDAKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5nYW1lLmNvbnRyYWN0LkdhbWUucmVnaXN0ZXIobmFtZTogYnl0ZXMpIC0+IGJ5dGVzOgpyZWdpc3RlcjoKICAgIHByb3RvIDEgMQogICAgYnl0ZSAidXNlciIKICAgIHR4biBTZW5kZXIKICAgIGNvbmNhdAogICAgYm94X2xlbgogICAgYnVyeSAxCiAgICBibnogcmVnaXN0ZXJfYWZ0ZXJfaWZfZWxzZUAyCiAgICBnbG9iYWwgTGF0ZXN0VGltZXN0YW1wCiAgICBpdG9iCiAgICBieXRlIDB4MDAxMgogICAgY29uY2F0CiAgICBieXRlIDB4MDAwMDAwMDAwMDAwMDAwMAogICAgY29uY2F0CiAgICBmcmFtZV9kaWcgLTEKICAgIGNvbmNhdAogICAgYnl0ZSAidXNlciIKICAgIHR4biBTZW5kZXIKICAgIGNvbmNhdAogICAgZHVwCiAgICBib3hfZGVsCiAgICBwb3AKICAgIHN3YXAKICAgIGJveF9wdXQKCnJlZ2lzdGVyX2FmdGVyX2lmX2Vsc2VAMjoKICAgIGJ5dGUgInVzZXIiCiAgICB0eG4gU2VuZGVyCiAgICBjb25jYXQKICAgIGJveF9nZXQKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLnVzZXIgZW50cnkgZXhpc3RzCiAgICByZXRzdWIKCgovLyBzbWFydF9jb250cmFjdHMuZ2FtZS5jb250cmFjdC5HYW1lLmZ1bmRfYWNjb3VudChwYXltZW50OiB1aW50NjQpIC0+IGJ5dGVzOgpmdW5kX2FjY291bnQ6CiAgICBwcm90byAxIDEKICAgIGZyYW1lX2RpZyAtMQogICAgZ3R4bnMgUmVjZWl2ZXIKICAgIGdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCiAgICA9PQogICAgYXNzZXJ0IC8vIFBheW1lbnQgcmVjZWl2ZXIgbXVzdCBiZSB0aGUgYXBwbGljYXRpb24gYWRkcmVzcwogICAgZnJhbWVfZGlnIC0xCiAgICBndHhucyBTZW5kZXIKICAgIGJ5dGUgInVzZXIiCiAgICBzd2FwCiAgICBjb25jYXQKICAgIGR1cAogICAgYm94X2xlbgogICAgYnVyeSAxCiAgICBhc3NlcnQgLy8gVXNlciBtdXN0IGJlIHJlZ2lzdGVyZWQKICAgIGR1cAogICAgYm94X2dldAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYudXNlciBlbnRyeSBleGlzdHMKICAgIGV4dHJhY3QgMTAgOCAvLyBvbiBlcnJvcjogSW5kZXggYWNjZXNzIGlzIG91dCBvZiBib3VuZHMKICAgIGJ0b2kKICAgIGZyYW1lX2RpZyAtMQogICAgZ3R4bnMgQW1vdW50CiAgICArCiAgICBpdG9iCiAgICBkaWcgMQogICAgYm94X2dldAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYudXNlciBlbnRyeSBleGlzdHMKICAgIHN3YXAKICAgIHJlcGxhY2UyIDEwCiAgICBkaWcgMQogICAgYm94X2RlbAogICAgcG9wCiAgICBkaWcgMQogICAgc3dhcAogICAgYm94X3B1dAogICAgYm94X2dldAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYudXNlciBlbnRyeSBleGlzdHMKICAgIGV4dHJhY3QgMTAgOCAvLyBvbiBlcnJvcjogSW5kZXggYWNjZXNzIGlzIG91dCBvZiBib3VuZHMKICAgIHJldHN1YgoKCi8vIHNtYXJ0X2NvbnRyYWN0cy5nYW1lLmNvbnRyYWN0LkdhbWUuYnV5X2Fzc2V0KGFzc2V0X2lkOiBieXRlcywgcXVhbnRpdHk6IHVpbnQ2NCkgLT4gdm9pZDoKYnV5X2Fzc2V0OgogICAgcHJvdG8gMiAwCiAgICBieXRlICJ1c2VyIgogICAgdHhuIFNlbmRlcgogICAgY29uY2F0CiAgICBib3hfbGVuCiAgICBidXJ5IDEKICAgIGFzc2VydCAvLyBVc2VyIG11c3QgYmUgcmVnaXN0ZXJlZAogICAgYnl0ZSAiYXNzZXQiCiAgICBmcmFtZV9kaWcgLTIKICAgIGNvbmNhdAogICAgZHVwCiAgICBib3hfbGVuCiAgICBidXJ5IDEKICAgIGFzc2VydCAvLyBJbnZhbGlkIGFzc2V0IElECiAgICBieXRlICJ1c2VyIgogICAgdHhuIFNlbmRlcgogICAgY29uY2F0CiAgICBib3hfZ2V0CiAgICBhc3NlcnQgLy8gY2hlY2sgc2VsZi51c2VyIGVudHJ5IGV4aXN0cwogICAgZXh0cmFjdCAxMCA4IC8vIG9uIGVycm9yOiBJbmRleCBhY2Nlc3MgaXMgb3V0IG9mIGJvdW5kcwogICAgYnRvaQogICAgc3dhcAogICAgYm94X2dldAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYuYXNzZXQgZW50cnkgZXhpc3RzCiAgICBleHRyYWN0IDQgOCAvLyBvbiBlcnJvcjogSW5kZXggYWNjZXNzIGlzIG91dCBvZiBib3VuZHMKICAgIGJ0b2kKICAgIGZyYW1lX2RpZyAtMQogICAgKgogICAgZHVwMgogICAgPj0KICAgIGFzc2VydCAvLyBJbnN1ZmZpY2llbnQgZnVuZHMKICAgIC0KICAgIGl0b2IKICAgIGJ5dGUgInVzZXIiCiAgICB0eG4gU2VuZGVyCiAgICBjb25jYXQKICAgIGJveF9nZXQKICAgIGFzc2VydCAvLyBjaGVjayBzZWxmLnVzZXIgZW50cnkgZXhpc3RzCiAgICBzd2FwCiAgICByZXBsYWNlMiAxMAogICAgYnl0ZSAidXNlciIKICAgIHR4biBTZW5kZXIKICAgIGNvbmNhdAogICAgZHVwCiAgICBib3hfZGVsCiAgICBwb3AKICAgIHN3YXAKICAgIGJveF9wdXQKICAgIHR4biBTZW5kZXIKICAgIGZyYW1lX2RpZyAtMgogICAgY29uY2F0CiAgICBzaGEyNTYKICAgIGJ5dGUgInVzZXJfYXNzZXQiCiAgICBzd2FwCiAgICBjb25jYXQKICAgIGR1cAogICAgYm94X2xlbgogICAgYnVyeSAxCiAgICBieiBidXlfYXNzZXRfZWxzZV9ib2R5QDIKICAgIGR1cAogICAgYm94X2dldAogICAgc3dhcAogICAgYnRvaQogICAgc3dhcAogICAgYXNzZXJ0IC8vIGNoZWNrIHNlbGYudXNlcl9hc3NldCBlbnRyeSBleGlzdHMKICAgIGZyYW1lX2RpZyAtMQogICAgKwogICAgaXRvYgogICAgYm94X3B1dAogICAgYiBidXlfYXNzZXRfYWZ0ZXJfaWZfZWxzZUAzCgpidXlfYXNzZXRfZWxzZV9ib2R5QDI6CiAgICBmcmFtZV9kaWcgLTEKICAgIGl0b2IKICAgIGJveF9wdXQKCmJ1eV9hc3NldF9hZnRlcl9pZl9lbHNlQDM6CiAgICByZXRzdWIKCgovLyBzbWFydF9jb250cmFjdHMuZ2FtZS5jb250cmFjdC5HYW1lLmFkbWluX3Vwc2VydF9hc3NldChhc3NldDogYnl0ZXMpIC0+IHZvaWQ6CmFkbWluX3Vwc2VydF9hc3NldDoKICAgIHByb3RvIDEgMAogICAgdHhuIFNlbmRlcgogICAgZ2xvYmFsIENyZWF0b3JBZGRyZXNzCiAgICA9PQogICAgYXNzZXJ0IC8vIE9ubHkgdGhlIGNyZWF0b3IgY2FuIGNhbGwgdGhpcyBtZXRob2QKICAgIGZyYW1lX2RpZyAtMQogICAgaW50IDAKICAgIGV4dHJhY3RfdWludDE2CiAgICBmcmFtZV9kaWcgLTEKICAgIGludCAyCiAgICBleHRyYWN0X3VpbnQxNgogICAgZnJhbWVfZGlnIC0xCiAgICBjb3ZlciAyCiAgICBzdWJzdHJpbmczCiAgICBzaGEyNTYKICAgIGJ5dGUgImFzc2V0IgogICAgc3dhcAogICAgY29uY2F0CiAgICBkdXAKICAgIGJveF9kZWwKICAgIHBvcAogICAgZnJhbWVfZGlnIC0xCiAgICBib3hfcHV0CiAgICByZXRzdWIK",
+        "clear": "I3ByYWdtYSB2ZXJzaW9uIDEwCgpzbWFydF9jb250cmFjdHMuZ2FtZS5jb250cmFjdC5HYW1lLmNsZWFyX3N0YXRlX3Byb2dyYW06CiAgICBpbnQgMQogICAgcmV0dXJuCg=="
     },
     "state": {
         "global": {
@@ -81,31 +107,70 @@ _APP_SPEC_JSON = r"""{
         }
     },
     "contract": {
-        "name": "HebaChainProductHistory",
+        "name": "Game",
         "methods": [
             {
-                "name": "save_product_history",
+                "name": "register",
                 "args": [
                     {
                         "type": "string",
-                        "name": "history_id"
-                    },
-                    {
-                        "type": "string",
-                        "name": "product_id"
-                    },
-                    {
-                        "type": "string",
-                        "name": "current_location"
-                    },
-                    {
-                        "type": "string",
-                        "name": "condition"
+                        "name": "name",
+                        "desc": "The user's name."
                     }
                 ],
                 "returns": {
-                    "type": "(string,string,string,string,uint64)"
-                }
+                    "type": "(uint64,string,uint64)",
+                    "desc": "The user's profile information."
+                },
+                "desc": "Registers a user and returns their profile information."
+            },
+            {
+                "name": "fund_account",
+                "args": [
+                    {
+                        "type": "pay",
+                        "name": "payment",
+                        "desc": "The payment transaction."
+                    }
+                ],
+                "returns": {
+                    "type": "uint64",
+                    "desc": "The user's updated balance."
+                },
+                "desc": "Funds a user's account."
+            },
+            {
+                "name": "buy_asset",
+                "args": [
+                    {
+                        "type": "byte[]",
+                        "name": "asset_id",
+                        "desc": "The hash of the asset name."
+                    },
+                    {
+                        "type": "uint64",
+                        "name": "quantity",
+                        "desc": "The quantity to purchase."
+                    }
+                ],
+                "returns": {
+                    "type": "void"
+                },
+                "desc": "Buys a game asset."
+            },
+            {
+                "name": "admin_upsert_asset",
+                "args": [
+                    {
+                        "type": "(string,string,uint64)",
+                        "name": "asset",
+                        "desc": "The game asset information."
+                    }
+                ],
+                "returns": {
+                    "type": "void"
+                },
+                "desc": "Updates or inserts a game asset."
             }
         ],
         "networks": {}
@@ -188,24 +253,67 @@ def _convert_deploy_args(
 
 
 @dataclasses.dataclass(kw_only=True)
-class History:
-    id: str
-    product_id: str
-    location: str
-    condition: str
-    timestamp: int
+class User:
+    registered_at: int
+    name: str
+    balance: int
 
 
 @dataclasses.dataclass(kw_only=True)
-class SaveProductHistoryArgs(_ArgsBase[History]):
-    history_id: str
-    product_id: str
-    current_location: str
-    condition: str
+class RegisterArgs(_ArgsBase[User]):
+    """Registers a user and returns their profile information."""
+
+    name: str
+    """The user's name."""
 
     @staticmethod
     def method() -> str:
-        return "save_product_history(string,string,string,string)(string,string,string,string,uint64)"
+        return "register(string)(uint64,string,uint64)"
+
+
+@dataclasses.dataclass(kw_only=True)
+class FundAccountArgs(_ArgsBase[int]):
+    """Funds a user's account."""
+
+    payment: TransactionWithSigner
+    """The payment transaction."""
+
+    @staticmethod
+    def method() -> str:
+        return "fund_account(pay)uint64"
+
+
+@dataclasses.dataclass(kw_only=True)
+class BuyAssetArgs(_ArgsBase[None]):
+    """Buys a game asset."""
+
+    asset_id: bytes | bytearray
+    """The hash of the asset name."""
+    quantity: int
+    """The quantity to purchase."""
+
+    @staticmethod
+    def method() -> str:
+        return "buy_asset(byte[],uint64)void"
+
+
+@dataclasses.dataclass(kw_only=True)
+class GameAsset:
+    name: str
+    description: str
+    price: int
+
+
+@dataclasses.dataclass(kw_only=True)
+class AdminUpsertAssetArgs(_ArgsBase[None]):
+    """Updates or inserts a game asset."""
+
+    asset: GameAsset
+    """The game asset information."""
+
+    @staticmethod
+    def method() -> str:
+        return "admin_upsert_asset((string,string,uint64))void"
 
 
 @dataclasses.dataclass(kw_only=True)
@@ -239,29 +347,100 @@ class Composer:
     def execute(self) -> AtomicTransactionResponse:
         return self.app_client.execute_atc(self.atc)
 
-    def save_product_history(
+    def register(
         self,
         *,
-        history_id: str,
-        product_id: str,
-        current_location: str,
-        condition: str,
+        name: str,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> "Composer":
-        """Adds a call to `save_product_history(string,string,string,string)(string,string,string,string,uint64)` ABI method
+        """Registers a user and returns their profile information.
         
-        :param str history_id: The `history_id` ABI parameter
-        :param str product_id: The `product_id` ABI parameter
-        :param str current_location: The `current_location` ABI parameter
-        :param str condition: The `condition` ABI parameter
+        Adds a call to `register(string)(uint64,string,uint64)` ABI method
+        
+        :param str name: The user's name.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns Composer: This Composer instance"""
 
-        args = SaveProductHistoryArgs(
-            history_id=history_id,
-            product_id=product_id,
-            current_location=current_location,
-            condition=condition,
+        args = RegisterArgs(
+            name=name,
+        )
+        self.app_client.compose_call(
+            self.atc,
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return self
+
+    def fund_account(
+        self,
+        *,
+        payment: TransactionWithSigner,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> "Composer":
+        """Funds a user's account.
+        
+        Adds a call to `fund_account(pay)uint64` ABI method
+        
+        :param TransactionWithSigner payment: The payment transaction.
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns Composer: This Composer instance"""
+
+        args = FundAccountArgs(
+            payment=payment,
+        )
+        self.app_client.compose_call(
+            self.atc,
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return self
+
+    def buy_asset(
+        self,
+        *,
+        asset_id: bytes | bytearray,
+        quantity: int,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> "Composer":
+        """Buys a game asset.
+        
+        Adds a call to `buy_asset(byte[],uint64)void` ABI method
+        
+        :param bytes | bytearray asset_id: The hash of the asset name.
+        :param int quantity: The quantity to purchase.
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns Composer: This Composer instance"""
+
+        args = BuyAssetArgs(
+            asset_id=asset_id,
+            quantity=quantity,
+        )
+        self.app_client.compose_call(
+            self.atc,
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return self
+
+    def admin_upsert_asset(
+        self,
+        *,
+        asset: GameAsset,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> "Composer":
+        """Updates or inserts a game asset.
+        
+        Adds a call to `admin_upsert_asset((string,string,uint64))void` ABI method
+        
+        :param GameAsset asset: The game asset information.
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns Composer: This Composer instance"""
+
+        args = AdminUpsertAssetArgs(
+            asset=asset,
         )
         self.app_client.compose_call(
             self.atc,
@@ -304,8 +483,8 @@ class Composer:
         return self
 
 
-class HebaChainProductHistoryClient:
-    """A class for interacting with the HebaChainProductHistory app providing high productivity and
+class GameClient:
+    """A class for interacting with the Game app providing high productivity and
     strongly typed methods to deploy and call the app"""
 
     @typing.overload
@@ -353,7 +532,7 @@ class HebaChainProductHistoryClient:
         app_name: str | None = None,
     ) -> None:
         """
-        HebaChainProductHistoryClient can be created with an app_id to interact with an existing application, alternatively
+        GameClient can be created with an app_id to interact with an existing application, alternatively
         it can be created with a creator and indexer_client specified to find existing applications by name and creator.
         
         :param AlgodClient algod_client: AlgoSDK algod client
@@ -430,29 +609,22 @@ class HebaChainProductHistoryClient:
     def suggested_params(self, value: algosdk.transaction.SuggestedParams | None) -> None:
         self.app_client.suggested_params = value
 
-    def save_product_history(
+    def register(
         self,
         *,
-        history_id: str,
-        product_id: str,
-        current_location: str,
-        condition: str,
+        name: str,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
-    ) -> algokit_utils.ABITransactionResponse[History]:
-        """Calls `save_product_history(string,string,string,string)(string,string,string,string,uint64)` ABI method
+    ) -> algokit_utils.ABITransactionResponse[User]:
+        """Registers a user and returns their profile information.
         
-        :param str history_id: The `history_id` ABI parameter
-        :param str product_id: The `product_id` ABI parameter
-        :param str current_location: The `current_location` ABI parameter
-        :param str condition: The `condition` ABI parameter
+        Calls `register(string)(uint64,string,uint64)` ABI method
+        
+        :param str name: The user's name.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
-        :returns algokit_utils.ABITransactionResponse[History]: The result of the transaction"""
+        :returns algokit_utils.ABITransactionResponse[User]: The user's profile information."""
 
-        args = SaveProductHistoryArgs(
-            history_id=history_id,
-            product_id=product_id,
-            current_location=current_location,
-            condition=condition,
+        args = RegisterArgs(
+            name=name,
         )
         result = self.app_client.call(
             call_abi_method=args.method(),
@@ -461,7 +633,82 @@ class HebaChainProductHistoryClient:
         )
         elements = self.app_spec.hints[args.method()].structs["output"]["elements"]
         result_dict = {element[0]: value for element, value in zip(elements, result.return_value)}
-        result.return_value = History(**result_dict)
+        result.return_value = User(**result_dict)
+        return result
+
+    def fund_account(
+        self,
+        *,
+        payment: TransactionWithSigner,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> algokit_utils.ABITransactionResponse[int]:
+        """Funds a user's account.
+        
+        Calls `fund_account(pay)uint64` ABI method
+        
+        :param TransactionWithSigner payment: The payment transaction.
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns algokit_utils.ABITransactionResponse[int]: The user's updated balance."""
+
+        args = FundAccountArgs(
+            payment=payment,
+        )
+        result = self.app_client.call(
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return result
+
+    def buy_asset(
+        self,
+        *,
+        asset_id: bytes | bytearray,
+        quantity: int,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> algokit_utils.ABITransactionResponse[None]:
+        """Buys a game asset.
+        
+        Calls `buy_asset(byte[],uint64)void` ABI method
+        
+        :param bytes | bytearray asset_id: The hash of the asset name.
+        :param int quantity: The quantity to purchase.
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
+
+        args = BuyAssetArgs(
+            asset_id=asset_id,
+            quantity=quantity,
+        )
+        result = self.app_client.call(
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return result
+
+    def admin_upsert_asset(
+        self,
+        *,
+        asset: GameAsset,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> algokit_utils.ABITransactionResponse[None]:
+        """Updates or inserts a game asset.
+        
+        Calls `admin_upsert_asset((string,string,uint64))void` ABI method
+        
+        :param GameAsset asset: The game asset information.
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
+
+        args = AdminUpsertAssetArgs(
+            asset=asset,
+        )
+        result = self.app_client.call(
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
         return result
 
     def create_bare(

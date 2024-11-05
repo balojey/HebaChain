@@ -1,97 +1,55 @@
-from algopy import ARC4Contract
+from algopy import ARC4Contract, arc4, String, Account, BoxMap, subroutine, Txn, Global
 from algopy.arc4 import abimethod
 import algopy
 
+class Product(arc4.Struct):
+    id: arc4.String
+    name: arc4.String
+    state: arc4.String
+    distributor: arc4.Address
+    intermediary: arc4.Address
+    customer: arc4.Address
+    condition: arc4.String
+    current_location: arc4.String
+    delivery_location: arc4.String
+    delivery_date: arc4.UInt64
 
-# class History(algopy.arc4.Struct):
-#     product_id: algopy.arc4.UInt64
-#     location: algopy.arc4.String
-#     condition: algopy.arc4.String
-#     timestamp: algopy.arc4.UInt64
 
-class ProductCreated(algopy.arc4.Struct):
-    product_id: algopy.arc4.UInt64
-    name: algopy.arc4.String
-    condition: algopy.arc4.String
-    delivery_location: algopy.arc4.String
-
-class ProductShipped(algopy.arc4.Struct):
-    product_id: algopy.arc4.UInt64
-    condition: algopy.arc4.String
-
-class ProductUpdated(algopy.arc4.Struct):
-    product_id: algopy.arc4.UInt64
-    condition: algopy.arc4.String
-    location: algopy.arc4.String
-
-class ProductDelivered(algopy.arc4.Struct):
-    product_id: algopy.arc4.UInt64
-    condition: algopy.arc4.String
-
-class Product(algopy.arc4.Struct):
-    id: algopy.arc4.UInt64
-    name: algopy.arc4.String
-    state: algopy.arc4.String
-    distributor: algopy.arc4.Address
-    intermediary: algopy.arc4.Address
-    customer: algopy.arc4.Address
-    condition: algopy.arc4.String
-    current_location: algopy.arc4.String
-    delivery_location: algopy.arc4.String
-    delivery_date: algopy.arc4.UInt64
+class History(arc4.Struct):
+    id: arc4.String
+    product_id: arc4.String
+    location: arc4.String
+    condition: arc4.String
+    timestamp: arc4.UInt64
 
 
 class HebaChain(ARC4Contract):
     def __init__(self) -> None:
-        self.products = algopy.Box(algopy.arc4.DynamicArray[algopy.arc4.DynamicBytes], key=b"product_")
-        # self.histories = algopy.Box(algopy.arc4.DynamicArray[algopy.arc4.DynamicArray[algopy.arc4.DynamicBytes]], key=b"history_")
-        self.total_product: algopy.UInt64 = algopy.UInt64(0)
-
-    @algopy.subroutine
-    def increment_total_product(self) -> None:
-        self.total_product += 1
+        self.products = BoxMap(String, Product)
+        self.histories = BoxMap(String, History)
 
     @algopy.subroutine
     def save_product(self, product: Product) -> None:
-        if not self.products:
-            self.products.value = algopy.arc4.DynamicArray[algopy.arc4.DynamicBytes].from_bytes(algopy.op.bzero(1))
-        self.products.value[product.id.native] = algopy.arc4.DynamicBytes(product.bytes)
+        self.products[product.id.native] = product.copy()
+
+    @subroutine
+    def save_history(self, history: History) -> History:
+        self.histories[history.id.native] = history.copy()
+        return history
 
     @algopy.subroutine
     def update_product(self, product: Product) -> None:
         self.save_product(product)
 
     @algopy.subroutine
-    def get_product(self, product_id: algopy.UInt64) -> Product:
-        return Product.from_bytes(self.products.value[product_id].native)
-
-    # @algopy.subroutine
-    # def save_history(self, history: History) -> None:
-    #     if not self.histories:
-    #         self.histories.value = algopy.arc4.DynamicArray[algopy.arc4.DynamicArray[algopy.arc4.DynamicBytes]]()
-    #     if not self.histories.value[history.product_id.native]:
-    #         self.histories.value[history.product_id.native] = algopy.arc4.DynamicArray[algopy.arc4.DynamicBytes]()
-    #     self.histories.value[history.product_id.native].append(algopy.arc4.DynamicBytes(history.bytes))
-
-    # @algopy.subroutine
-    # def get_history(self, product_id: algopy.UInt64) -> algopy.arc4.DynamicArray[History]:
-    #     histories = self.histories.value[product_id].copy()
-    #     new_histories: algopy.arc4.DynamicArray[History] = algopy.arc4.DynamicArray[History]()
-    #     for i in algopy.urange(histories.length):
-    #         new_histories.append(History.from_bytes(histories[i].native))
-    #     return new_histories
-
-    @algopy.subroutine
-    def get_all_product(self) -> algopy.arc4.DynamicArray[Product]:
-        products = self.products.value.copy()
-        new_products: algopy.arc4.DynamicArray[Product] = algopy.arc4.DynamicArray[Product].from_bytes(algopy.op.bzero(1))
-        for i in algopy.urange(products.length):
-            new_products.append(Product.from_bytes(products[i].native))
-        return new_products
+    def get_product(self, product_id: algopy.String) -> Product:
+        return self.products[product_id]
 
     @abimethod()
     def add_product(
         self,
+        product_id: arc4.String,
+        history_id: arc4.String,
         name: algopy.arc4.String,
         customer: algopy.arc4.Address,
         intermediary: algopy.arc4.Address,
@@ -99,131 +57,99 @@ class HebaChain(ARC4Contract):
         current_location: algopy.arc4.String,
         delivery_location: algopy.arc4.String
     ) -> None:
-        product_id: algopy.arc4.UInt64 = algopy.arc4.UInt64(self.total_product)
-        current_timestamp: algopy.arc4.UInt64 = algopy.arc4.UInt64(algopy.Global.latest_timestamp)
-
-        # self.save_history(
-        #     History(product_id, current_location, condition, current_timestamp)
-        # )
+        current_timestamp: arc4.UInt64 = arc4.UInt64(Global.latest_timestamp)
         self.save_product(
             Product(
-                product_id,
-                name,
-                algopy.arc4.String("CREATED"),
-                algopy.arc4.Address(algopy.Txn.sender),
-                intermediary,
-                customer,
-                condition,
-                current_location,
-                delivery_location,
-                algopy.arc4.UInt64(0)
+                product_id, name, algopy.arc4.String("CREATED"), algopy.arc4.Address(algopy.Txn.sender),\
+                intermediary, customer, condition, current_location, delivery_location, algopy.arc4.UInt64(0)
             )
         )
-
-        algopy.log(ProductCreated(product_id, name, condition, delivery_location))
-        self.increment_total_product()
+        self.save_history(
+            History(
+                history_id, product_id, current_location, condition, current_timestamp
+            )
+        )
+        algopy.log(product_id, name, condition, delivery_location)
 
     @abimethod()
     # @only_intermediary
     def ship_product(
         self,
-        product_id: algopy.arc4.UInt64,
-        condition: algopy.arc4.String,
-        location: algopy.arc4.String,
-        delivery_date: algopy.arc4.UInt64
-    ) -> None:        
+        product_id: arc4.String,
+        history_id: arc4.String,
+        condition: arc4.String,
+        location: arc4.String,
+        delivery_date: arc4.UInt64
+    ) -> None:
+        current_timestamp: arc4.UInt64 = arc4.UInt64(Global.latest_timestamp)
         product: Product = self.get_product(product_id.native)
-        current_timestamp: algopy.arc4.UInt64 = algopy.arc4.UInt64(algopy.Global.latest_timestamp)
 
-        assert algopy.arc4.Address(algopy.Txn.sender) == product.intermediary, "Only the Intermediary can call this function"
-        assert product.state == algopy.arc4.String("CREATED"), "Product is not in created state!"
+        assert arc4.Address(Txn.sender) == product.intermediary, "Only the Intermediary can call this function"
+        assert product.state == arc4.String("CREATED"), "Product is not in created state!"
 
-        # self.save_history(
-        #     History(
-        #         product.id,
-        #         location,
-        #         condition,
-        #         current_timestamp
-        #     )
-        # )
         product.condition = condition
         product.current_location = location
         product.delivery_date = delivery_date
-        product.state = algopy.arc4.String("SHIPPED")
+        product.state = arc4.String("SHIPPED")
         self.update_product(product)
+        self.save_history(
+            History(
+                history_id, product_id, location, condition, current_timestamp
+            )
+        )
 
-        algopy.log(ProductShipped(product.id, condition))
+        algopy.log(product.id, condition)
 
     @abimethod
     # @only_intermediary
     def alter_product(
         self,
-        product_id: algopy.arc4.UInt64,
-        condition: algopy.arc4.String,
-        location: algopy.arc4.String
+        product_id: arc4.String,
+        history_id: arc4.String,
+        condition: arc4.String,
+        location: arc4.String
     ) -> None:
+        current_timestamp: arc4.UInt64 = arc4.UInt64(Global.latest_timestamp)
         product = self.get_product(product_id.native)
-        current_timestamp: algopy.arc4.UInt64 = algopy.arc4.UInt64(algopy.Global.latest_timestamp)
 
-        assert algopy.arc4.Address(algopy.Txn.sender) == product.intermediary, "Only the Intermediary can call this function"
-        assert product.state == algopy.arc4.String("SHIPPED"), "Product is not in shipped state!"
+        assert arc4.Address(Txn.sender) == product.intermediary, "Only the Intermediary can call this function"
+        assert product.state == arc4.String("SHIPPED"), "Product is not in shipped state!"
 
         product.condition = condition
         product.current_location = location
 
-        # self.save_history(
-        #     History(
-        #         product.id,
-        #         location,
-        #         condition,
-        #         current_timestamp
-        #     )
-        # )
         self.update_product(product)
+        self.save_history(
+            History(
+                history_id, product_id, location, condition, current_timestamp
+            )
+        )
 
-        algopy.log(ProductUpdated(product_id, condition, location))
+        algopy.log(product_id, condition, location)
 
     @abimethod
     # @only_customer
     def deliver_product(
         self,
-        product_id: algopy.arc4.UInt64,
-        condition: algopy.arc4.String
+        product_id: arc4.String,
+        history_id: arc4.String,
+        condition: arc4.String
     ) -> None:
+        current_timestamp: arc4.UInt64 = arc4.UInt64(Global.latest_timestamp)
         product = self.get_product(product_id.native)
-        current_timestamp: algopy.arc4.UInt64 = algopy.arc4.UInt64(algopy.Global.latest_timestamp)
 
-        assert algopy.arc4.Address(algopy.Txn.sender) == product.customer, "Only the customer can call this function"
-        assert product.state == algopy.arc4.String("SHIPPED"), "Product is not in shipped state!"
+        assert arc4.Address(Txn.sender) == product.customer, "Only the customer can call this function"
+        assert product.state == arc4.String("SHIPPED"), "Product is not in shipped state!"
         
         product.current_location = product.delivery_location
         product.condition = condition
-        product.state = algopy.arc4.String("DELIVERED")
-
-        # self.save_history(
-        #     History(
-        #         product.id,
-        #         product.delivery_location,
-        #         condition,
-        #         current_timestamp
-        #     )
-        # )
+        product.state = arc4.String("DELIVERED")
         self.update_product(product)
+        self.save_history(
+            History(
+                history_id, product_id, product.current_location, condition, current_timestamp
+            )
+        )
         
-        algopy.log(ProductDelivered(product.id, condition))
-
-    # @abimethod()
-    # def get_product_history(
-    #     self,
-    #     product_id: algopy.arc4.UInt64
-    # ) -> algopy.arc4.DynamicArray[History]:
-    #     return self.get_history(product_id.native)
-
-    @abimethod
-    def get_products(
-        self
-    ) -> algopy.arc4.DynamicArray[Product]:
-        # products = [Product.from_bytes(product) for product in self.products.value]
-        # return tuple(products)
-        return self.get_all_product()
+        algopy.log(product.id, condition)
 

@@ -1,11 +1,6 @@
 #pragma version 10
 
 smart_contracts.heba_chain.contract.HebaChain.approval_program:
-    txn ApplicationID
-    bnz main_entrypoint@2
-    callsub __init__
-
-main_entrypoint@2:
     callsub __puya_arc4_router__
     return
 
@@ -14,14 +9,13 @@ main_entrypoint@2:
 __puya_arc4_router__:
     proto 0 1
     txn NumAppArgs
-    bz __puya_arc4_router___bare_routing@9
-    method "add_product(string,address,address,string,string,string)void"
-    method "ship_product(uint64,string,string,uint64)void"
-    method "alter_product(uint64,string,string)void"
-    method "deliver_product(uint64,string)void"
-    method "get_products()(uint64,string,string,address,address,address,string,string,string,uint64)[]"
+    bz __puya_arc4_router___bare_routing@8
+    method "add_product(string,string,string,address,address,string,string,string)void"
+    method "ship_product(string,string,string,string,uint64)void"
+    method "alter_product(string,string,string,string)void"
+    method "deliver_product(string,string,string)void"
     txna ApplicationArgs 0
-    match __puya_arc4_router___add_product_route@2 __puya_arc4_router___ship_product_route@3 __puya_arc4_router___alter_product_route@4 __puya_arc4_router___deliver_product_route@5 __puya_arc4_router___get_products_route@6
+    match __puya_arc4_router___add_product_route@2 __puya_arc4_router___ship_product_route@3 __puya_arc4_router___alter_product_route@4 __puya_arc4_router___deliver_product_route@5
     int 0
     retsub
 
@@ -37,6 +31,8 @@ __puya_arc4_router___add_product_route@2:
     txna ApplicationArgs 4
     txna ApplicationArgs 5
     txna ApplicationArgs 6
+    txna ApplicationArgs 7
+    txna ApplicationArgs 8
     callsub add_product
     int 1
     retsub
@@ -51,6 +47,7 @@ __puya_arc4_router___ship_product_route@3:
     txna ApplicationArgs 2
     txna ApplicationArgs 3
     txna ApplicationArgs 4
+    txna ApplicationArgs 5
     callsub ship_product
     int 1
     retsub
@@ -64,6 +61,7 @@ __puya_arc4_router___alter_product_route@4:
     txna ApplicationArgs 1
     txna ApplicationArgs 2
     txna ApplicationArgs 3
+    txna ApplicationArgs 4
     callsub alter_product
     int 1
     retsub
@@ -76,67 +74,57 @@ __puya_arc4_router___deliver_product_route@5:
     assert // is not creating
     txna ApplicationArgs 1
     txna ApplicationArgs 2
+    txna ApplicationArgs 3
     callsub deliver_product
     int 1
     retsub
 
-__puya_arc4_router___get_products_route@6:
+__puya_arc4_router___bare_routing@8:
     txn OnCompletion
-    !
-    assert // OnCompletion is NoOp
-    txn ApplicationID
-    assert // is not creating
-    callsub get_products
-    byte 0x151f7c75
-    swap
-    concat
-    log
-    int 1
-    retsub
-
-__puya_arc4_router___bare_routing@9:
-    txn OnCompletion
-    bnz __puya_arc4_router___after_if_else@13
+    bnz __puya_arc4_router___after_if_else@12
     txn ApplicationID
     !
     assert // is creating
     int 1
     retsub
 
-__puya_arc4_router___after_if_else@13:
+__puya_arc4_router___after_if_else@12:
     int 0
     retsub
 
 
-// smart_contracts.heba_chain.contract.HebaChain.add_product(name: bytes, customer: bytes, intermediary: bytes, condition: bytes, current_location: bytes, delivery_location: bytes) -> void:
+// smart_contracts.heba_chain.contract.HebaChain.add_product(product_id: bytes, history_id: bytes, name: bytes, customer: bytes, intermediary: bytes, condition: bytes, current_location: bytes, delivery_location: bytes) -> void:
 add_product:
-    proto 6 0
-    int 0
-    byte "total_product"
-    app_global_get_ex
-    assert // check self.total_product exists
+    proto 8 0
+    global LatestTimestamp
     itob
     txn Sender
-    swap
-    dup
-    byte 0x007a
-    concat
-    frame_dig -6
+    frame_dig -8
     len
-    int 122
+    int 116
     dig 1
     +
     dup
     itob
     extract 6 2
-    uncover 3
+    byte 0x0074
+    swap
+    concat
+    swap
+    frame_dig -6
+    len
+    +
+    dup
+    itob
+    extract 6 2
+    uncover 2
     swap
     concat
     swap
     int 9
     +
     swap
-    uncover 4
+    uncover 3
     concat
     frame_dig -4
     concat
@@ -149,8 +137,6 @@ add_product:
     swap
     frame_dig -3
     len
-    dup
-    cover 3
     +
     dup
     itob
@@ -161,11 +147,15 @@ add_product:
     swap
     frame_dig -2
     len
+    dup
+    cover 3
     +
     itob
     extract 6 2
     concat
     byte 0x0000000000000000
+    concat
+    frame_dig -8
     concat
     frame_dig -6
     concat
@@ -179,10 +169,17 @@ add_product:
     concat
     callsub save_product
     pop
-    uncover 2
-    byte 0x000e
+    frame_dig -7
+    len
+    int 16
+    +
+    dup
+    itob
+    extract 6 2
+    byte 0x0010
+    swap
     concat
-    int 14
+    swap
     uncover 3
     +
     dup
@@ -197,6 +194,19 @@ add_product:
     itob
     extract 6 2
     concat
+    swap
+    concat
+    frame_dig -7
+    concat
+    frame_dig -8
+    concat
+    frame_dig -2
+    concat
+    frame_dig -3
+    concat
+    callsub save_history
+    popn 2
+    frame_dig -8
     frame_dig -6
     concat
     frame_dig -3
@@ -204,86 +214,81 @@ add_product:
     frame_dig -1
     concat
     log
-    callsub increment_total_product
     retsub
 
 
 // smart_contracts.heba_chain.contract.HebaChain.save_product(product: bytes) -> bytes:
 save_product:
     proto 1 1
-    byte 0x70726f647563745f
-    box_len
-    bury 1
-    bnz save_product_after_if_else@2
-    int 1
-    bzero
-    byte 0x70726f647563745f
-    box_del
-    pop
-    byte 0x70726f647563745f
-    swap
-    box_put
-
-save_product_after_if_else@2:
     frame_dig -1
-    len
-    itob
-    extract 6 2
-    frame_dig -1
-    concat
-    byte 0x70726f647563745f
-    box_get
-    assert // check self.products exists
-    frame_dig -1
-    extract 0 8 // on error: Index access is out of bounds
-    btoi
-    swap
-    cover 2
-    callsub dynamic_array_replace_byte_length_head
-    byte 0x70726f647563745f
-    box_del
-    pop
-    byte 0x70726f647563745f
-    swap
-    box_put
-    frame_dig -1
-    retsub
-
-
-// smart_contracts.heba_chain.contract.HebaChain.increment_total_product() -> void:
-increment_total_product:
-    proto 0 0
     int 0
-    byte "total_product"
-    app_global_get_ex
-    assert // check self.total_product exists
-    int 1
-    +
-    byte "total_product"
+    extract_uint16
+    frame_dig -1
+    int 2
+    extract_uint16
+    frame_dig -1
+    cover 2
+    substring3
+    extract 2 0
+    byte "products"
     swap
-    app_global_put
+    concat
+    dup
+    box_del
+    pop
+    frame_dig -1
+    box_put
+    frame_dig -1
     retsub
 
 
-// smart_contracts.heba_chain.contract.HebaChain.ship_product(product_id: bytes, condition: bytes, location: bytes, delivery_date: bytes) -> void:
+// smart_contracts.heba_chain.contract.HebaChain.save_history(history: bytes) -> bytes, bytes:
+save_history:
+    proto 1 2
+    frame_dig -1
+    int 0
+    extract_uint16
+    frame_dig -1
+    int 2
+    extract_uint16
+    frame_dig -1
+    cover 2
+    substring3
+    extract 2 0
+    byte "histories"
+    swap
+    concat
+    dup
+    box_del
+    pop
+    frame_dig -1
+    box_put
+    frame_dig -1
+    dup
+    retsub
+
+
+// smart_contracts.heba_chain.contract.HebaChain.ship_product(product_id: bytes, history_id: bytes, condition: bytes, location: bytes, delivery_date: bytes) -> void:
 ship_product:
-    proto 4 0
-    frame_dig -4
-    btoi
+    proto 5 0
+    global LatestTimestamp
+    itob
+    frame_dig -5
+    extract 2 0
     callsub get_product
     txn Sender
     swap
     dup
-    extract 44 32 // on error: Index access is out of bounds
+    extract 38 32 // on error: Index access is out of bounds
     uncover 2
     ==
     assert // Only the Intermediary can call this function
     dup
-    int 10
+    int 4
     extract_uint16
     swap
     dup
-    int 108
+    int 102
     extract_uint16
     dig 1
     uncover 3
@@ -298,7 +303,7 @@ ship_product:
     extract3
     swap
     dig 2
-    int 110
+    int 104
     extract_uint16
     swap
     dig 3
@@ -319,7 +324,7 @@ ship_product:
     frame_dig -3
     len
     dig 1
-    int 110
+    int 104
     extract_uint16
     dig 1
     +
@@ -329,9 +334,9 @@ ship_product:
     extract 6 2
     uncover 2
     swap
-    replace2 110
+    replace2 104
     dup
-    int 112
+    int 106
     extract_uint16
     uncover 2
     +
@@ -339,9 +344,9 @@ ship_product:
     -
     itob
     extract 6 2
-    replace2 112
+    replace2 106
     dup
-    int 110
+    int 104
     extract_uint16
     dig 1
     int 0
@@ -349,7 +354,7 @@ ship_product:
     extract3
     swap
     dig 2
-    int 112
+    int 106
     extract_uint16
     swap
     dig 3
@@ -370,18 +375,21 @@ ship_product:
     frame_dig -2
     len
     dig 1
-    int 112
+    int 106
     extract_uint16
+    dig 1
     +
-    uncover 2
+    uncover 3
     -
     itob
     extract 6 2
-    replace2 112
+    uncover 2
+    swap
+    replace2 106
     frame_dig -1
-    replace2 114
+    replace2 108
     dup
-    int 10
+    int 4
     extract_uint16
     dig 1
     int 0
@@ -389,7 +397,7 @@ ship_product:
     extract3
     swap
     dig 2
-    int 108
+    int 102
     extract_uint16
     swap
     dig 3
@@ -408,7 +416,7 @@ ship_product:
     -
     swap
     dup
-    int 108
+    int 102
     extract_uint16
     int 9
     +
@@ -416,9 +424,9 @@ ship_product:
     -
     itob
     extract 6 2
-    replace2 108
+    replace2 102
     dup
-    int 110
+    int 104
     extract_uint16
     int 9
     +
@@ -426,9 +434,9 @@ ship_product:
     -
     itob
     extract 6 2
-    replace2 110
+    replace2 104
     dup
-    int 112
+    int 106
     extract_uint16
     int 9
     +
@@ -436,43 +444,70 @@ ship_product:
     -
     itob
     extract 6 2
-    replace2 112
+    replace2 106
     callsub update_product
-    extract 0 8 // on error: Index access is out of bounds
-    byte 0x000a
+    frame_dig -4
+    len
+    int 16
+    +
+    dup
+    itob
+    extract 6 2
+    byte 0x0010
+    swap
     concat
+    swap
+    frame_dig -5
+    len
+    +
+    dup
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    concat
+    swap
+    uncover 3
+    +
+    itob
+    extract 6 2
+    concat
+    uncover 2
+    concat
+    frame_dig -4
+    concat
+    frame_dig -5
+    concat
+    frame_dig -2
+    concat
+    frame_dig -3
+    concat
+    callsub save_history
+    popn 2
+    dup
+    int 0
+    extract_uint16
+    swap
+    dup
+    int 2
+    extract_uint16
+    swap
+    cover 2
+    substring3
     frame_dig -3
     concat
     log
     retsub
 
 
-// smart_contracts.heba_chain.contract.HebaChain.get_product(product_id: uint64) -> bytes:
+// smart_contracts.heba_chain.contract.HebaChain.get_product(product_id: bytes) -> bytes:
 get_product:
     proto 1 1
-    byte 0x70726f647563745f
+    byte "products"
+    frame_dig -1
+    concat
     box_get
-    assert // check self.products exists
-    dup
-    extract 2 0
-    swap
-    int 0
-    extract_uint16
-    frame_dig -1
-    >
-    assert // Index access is out of bounds
-    frame_dig -1
-    int 2
-    *
-    dig 1
-    swap
-    extract_uint16
-    dup2
-    extract_uint16
-    int 2
-    +
-    extract3
-    extract 2 0
+    assert // check self.products entry exists
     retsub
 
 
@@ -486,25 +521,27 @@ update_product:
     retsub
 
 
-// smart_contracts.heba_chain.contract.HebaChain.alter_product(product_id: bytes, condition: bytes, location: bytes) -> void:
+// smart_contracts.heba_chain.contract.HebaChain.alter_product(product_id: bytes, history_id: bytes, condition: bytes, location: bytes) -> void:
 alter_product:
-    proto 3 0
-    frame_dig -3
-    btoi
+    proto 4 0
+    global LatestTimestamp
+    itob
+    frame_dig -4
+    extract 2 0
     callsub get_product
     txn Sender
     swap
     dup
-    extract 44 32 // on error: Index access is out of bounds
+    extract 38 32 // on error: Index access is out of bounds
     uncover 2
     ==
     assert // Only the Intermediary can call this function
     dup
-    int 10
+    int 4
     extract_uint16
     swap
     dup
-    int 108
+    int 102
     extract_uint16
     dig 1
     uncover 3
@@ -519,7 +556,7 @@ alter_product:
     extract3
     swap
     dig 2
-    int 110
+    int 104
     extract_uint16
     swap
     dig 3
@@ -540,7 +577,7 @@ alter_product:
     frame_dig -2
     len
     dig 1
-    int 110
+    int 104
     extract_uint16
     dig 1
     +
@@ -550,19 +587,19 @@ alter_product:
     extract 6 2
     uncover 2
     swap
-    replace2 110
+    replace2 104
     dup
-    int 112
+    int 106
     extract_uint16
-    dig 2
+    uncover 2
     +
-    uncover 3
+    uncover 2
     -
     itob
     extract 6 2
-    replace2 112
+    replace2 106
     dup
-    int 110
+    int 104
     extract_uint16
     dig 1
     int 0
@@ -570,7 +607,7 @@ alter_product:
     extract3
     swap
     dig 2
-    int 112
+    int 106
     extract_uint16
     swap
     dig 3
@@ -591,25 +628,58 @@ alter_product:
     frame_dig -1
     len
     dig 1
-    int 112
+    int 106
     extract_uint16
+    dig 1
     +
-    uncover 2
+    uncover 3
     -
     itob
     extract 6 2
-    replace2 112
+    uncover 2
+    swap
+    replace2 106
     callsub update_product
     pop
     frame_dig -3
-    byte 0x000c
+    len
+    int 16
+    +
+    dup
+    itob
+    extract 6 2
+    byte 0x0010
+    swap
     concat
-    int 12
+    swap
+    frame_dig -4
+    len
+    +
+    dup
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    concat
+    swap
     uncover 2
     +
     itob
     extract 6 2
     concat
+    swap
+    concat
+    frame_dig -3
+    concat
+    frame_dig -4
+    concat
+    frame_dig -1
+    concat
+    frame_dig -2
+    concat
+    callsub save_history
+    popn 2
+    frame_dig -4
     frame_dig -2
     concat
     frame_dig -1
@@ -618,25 +688,27 @@ alter_product:
     retsub
 
 
-// smart_contracts.heba_chain.contract.HebaChain.deliver_product(product_id: bytes, condition: bytes) -> void:
+// smart_contracts.heba_chain.contract.HebaChain.deliver_product(product_id: bytes, history_id: bytes, condition: bytes) -> void:
 deliver_product:
-    proto 2 0
-    frame_dig -2
-    btoi
+    proto 3 0
+    global LatestTimestamp
+    itob
+    frame_dig -3
+    extract 2 0
     callsub get_product
     txn Sender
     swap
     dup
-    extract 76 32 // on error: Index access is out of bounds
+    extract 70 32 // on error: Index access is out of bounds
     uncover 2
     ==
     assert // Only the customer can call this function
     dup
-    int 10
+    int 4
     extract_uint16
     swap
     dup
-    int 108
+    int 102
     extract_uint16
     dig 1
     uncover 3
@@ -646,7 +718,7 @@ deliver_product:
     ==
     assert // Product is not in shipped state!
     dup
-    int 112
+    int 106
     extract_uint16
     swap
     dup
@@ -658,7 +730,7 @@ deliver_product:
     substring3
     swap
     dup
-    int 110
+    int 104
     extract_uint16
     swap
     int 0
@@ -676,16 +748,16 @@ deliver_product:
     swap
     len
     dig 1
-    int 112
+    int 106
     extract_uint16
     +
     uncover 2
     -
     itob
     extract 6 2
-    replace2 112
+    replace2 106
     dup
-    int 108
+    int 102
     extract_uint16
     dig 1
     int 0
@@ -693,7 +765,7 @@ deliver_product:
     extract3
     swap
     dig 2
-    int 110
+    int 104
     extract_uint16
     swap
     dig 3
@@ -714,7 +786,7 @@ deliver_product:
     frame_dig -1
     len
     dig 1
-    int 110
+    int 104
     extract_uint16
     dig 1
     +
@@ -724,9 +796,9 @@ deliver_product:
     extract 6 2
     uncover 2
     swap
-    replace2 110
+    replace2 104
     dup
-    int 112
+    int 106
     extract_uint16
     uncover 2
     +
@@ -734,9 +806,9 @@ deliver_product:
     -
     itob
     extract 6 2
-    replace2 112
+    replace2 106
     dup
-    int 10
+    int 4
     extract_uint16
     dig 1
     int 0
@@ -744,7 +816,7 @@ deliver_product:
     extract3
     swap
     dig 2
-    int 108
+    int 102
     extract_uint16
     swap
     dig 3
@@ -763,7 +835,7 @@ deliver_product:
     -
     swap
     dup
-    int 108
+    int 102
     extract_uint16
     int 11
     +
@@ -771,9 +843,9 @@ deliver_product:
     -
     itob
     extract 6 2
-    replace2 108
+    replace2 102
     dup
-    int 110
+    int 104
     extract_uint16
     int 11
     +
@@ -781,9 +853,9 @@ deliver_product:
     -
     itob
     extract 6 2
-    replace2 110
+    replace2 104
     dup
-    int 112
+    int 106
     extract_uint16
     int 11
     +
@@ -791,293 +863,69 @@ deliver_product:
     -
     itob
     extract 6 2
-    replace2 112
+    replace2 106
     callsub update_product
-    extract 0 8 // on error: Index access is out of bounds
-    byte 0x000a
+    dup
+    int 104
+    extract_uint16
+    swap
+    dup
+    int 106
+    extract_uint16
+    dig 1
+    uncover 3
+    uncover 2
+    substring3
+    frame_dig -2
+    len
+    int 16
+    +
+    dup
+    itob
+    extract 6 2
+    byte 0x0010
+    swap
     concat
+    swap
+    frame_dig -3
+    len
+    +
+    dup
+    itob
+    extract 6 2
+    uncover 2
+    swap
+    concat
+    swap
+    dig 2
+    len
+    +
+    itob
+    extract 6 2
+    concat
+    uncover 3
+    concat
+    frame_dig -2
+    concat
+    frame_dig -3
+    concat
+    swap
+    concat
+    frame_dig -1
+    concat
+    callsub save_history
+    popn 2
+    dup
+    int 0
+    extract_uint16
+    swap
+    dup
+    int 2
+    extract_uint16
+    swap
+    cover 2
+    substring3
     frame_dig -1
     concat
     log
-    retsub
-
-
-// smart_contracts.heba_chain.contract.HebaChain.get_products() -> bytes:
-get_products:
-    proto 0 1
-    callsub get_all_product
-    retsub
-
-
-// smart_contracts.heba_chain.contract.HebaChain.get_all_product() -> bytes:
-get_all_product:
-    proto 0 1
-    byte ""
-    byte 0x70726f647563745f
-    box_get
-    swap
-    dup
-    uncover 2
-    assert // check self.products exists
-    int 1
-    bzero
-    swap
-    int 0
-    extract_uint16
-    int 0
-
-get_all_product_for_header@1:
-    frame_dig 4
-    frame_dig 3
-    <
-    dup
-    frame_bury 0
-    bz get_all_product_after_for@4
-    frame_dig 1
-    extract 2 0
-    frame_dig 0
-    assert // Index access is out of bounds
-    frame_dig 4
-    dup
-    cover 2
-    int 2
-    *
-    dig 1
-    swap
-    extract_uint16
-    dup2
-    extract_uint16
-    int 2
-    +
-    extract3
-    extract 2 0
-    byte 0x0002
-    swap
-    concat
-    frame_dig 2
-    dup
-    int 0
-    extract_uint16
-    swap
-    extract 2 0
-    int 1
-    uncover 3
-    callsub dynamic_array_concat_dynamic_element
-    frame_bury 2
-    int 1
-    +
-    frame_bury 4
-    b get_all_product_for_header@1
-
-get_all_product_after_for@4:
-    frame_dig 2
-    frame_bury 0
-    retsub
-
-
-// smart_contracts.heba_chain.contract.HebaChain.__init__() -> void:
-__init__:
-    proto 0 0
-    byte "total_product"
-    int 0
-    app_global_put
-    retsub
-
-
-// _puya_lib.arc4.dynamic_array_concat_dynamic_element(array_items_count: uint64, array_head_and_tail: bytes, new_items_count: uint64, new_head_and_tail: bytes) -> bytes:
-dynamic_array_concat_dynamic_element:
-    proto 4 1
-    byte ""
-    byte 0x
-    frame_dig -2
-    int 2
-    *
-    frame_dig -4
-    int 2
-    *
-    int 0
-
-dynamic_array_concat_dynamic_element_for_header@1:
-    frame_dig 4
-    frame_dig 3
-    <
-    bz dynamic_array_concat_dynamic_element_after_for@4
-    frame_dig -3
-    frame_dig 4
-    dup
-    cover 2
-    extract_uint16
-    frame_dig 2
-    +
-    itob
-    extract 6 2
-    frame_dig 1
-    swap
-    concat
-    frame_bury 1
-    int 2
-    +
-    frame_bury 4
-    b dynamic_array_concat_dynamic_element_for_header@1
-
-dynamic_array_concat_dynamic_element_after_for@4:
-    frame_dig -3
-    len
-    frame_bury 0
-    int 0
-    frame_bury 4
-
-dynamic_array_concat_dynamic_element_for_header@5:
-    frame_dig 4
-    frame_dig 2
-    <
-    bz dynamic_array_concat_dynamic_element_after_for@8
-    frame_dig -1
-    frame_dig 4
-    dup
-    cover 2
-    extract_uint16
-    frame_dig 0
-    +
-    itob
-    extract 6 2
-    frame_dig 1
-    swap
-    concat
-    frame_bury 1
-    int 2
-    +
-    frame_bury 4
-    b dynamic_array_concat_dynamic_element_for_header@5
-
-dynamic_array_concat_dynamic_element_after_for@8:
-    frame_dig -4
-    frame_dig -2
-    +
-    itob
-    extract 6 2
-    frame_dig 1
-    concat
-    frame_dig -3
-    frame_dig 3
-    frame_dig 0
-    substring3
-    concat
-    frame_dig -1
-    len
-    frame_dig -1
-    frame_dig 2
-    uncover 2
-    substring3
-    concat
-    frame_bury 0
-    retsub
-
-
-// _puya_lib.arc4.dynamic_array_replace_byte_length_head(array: bytes, new_item: bytes, index: uint64) -> bytes:
-dynamic_array_replace_byte_length_head:
-    proto 3 1
-    frame_dig -3
-    substring 0 2
-    dup
-    btoi
-    frame_dig -3
-    extract 2 0
-    frame_dig -2
-    frame_dig -1
-    uncover 3
-    callsub static_array_replace_byte_length_head
-    concat
-    retsub
-
-
-// _puya_lib.arc4.static_array_replace_byte_length_head(array_head_and_tail: bytes, new_item: bytes, index: uint64, array_length: uint64) -> bytes:
-static_array_replace_byte_length_head:
-    proto 4 1
-    frame_dig -2
-    frame_dig -1
-    <
-    assert // Index out of bounds
-    frame_dig -2
-    int 2
-    *
-    frame_dig -4
-    swap
-    extract_uint16
-    frame_dig -4
-    dig 1
-    extract_uint16
-    dig 1
-    +
-    int 2
-    +
-    swap
-    frame_dig -4
-    int 0
-    uncover 2
-    substring3
-    frame_dig -3
-    concat
-    frame_dig -4
-    len
-    frame_dig -4
-    uncover 3
-    uncover 2
-    substring3
-    concat
-    frame_dig -1
-    frame_dig -2
-    callsub recalculate_head_for_elements_with_byte_length_head
-    retsub
-
-
-// _puya_lib.arc4.recalculate_head_for_elements_with_byte_length_head(array_head_and_tail: bytes, length: uint64, start_at_index: uint64) -> bytes:
-recalculate_head_for_elements_with_byte_length_head:
-    proto 3 1
-    frame_dig -2
-    int 2
-    *
-    dup
-    frame_dig -1
-    int 2
-    *
-    dup
-    cover 2
-    frame_dig -3
-    swap
-    extract_uint16
-    frame_dig -1
-    select
-
-recalculate_head_for_elements_with_byte_length_head_for_header@1:
-    frame_dig 1
-    frame_dig 0
-    <
-    bz recalculate_head_for_elements_with_byte_length_head_after_for@4
-    frame_dig 2
-    dup
-    itob
-    extract 6 2
-    frame_dig -3
-    frame_dig 1
-    dup
-    cover 4
-    uncover 2
-    replace3
-    dup
-    frame_bury -3
-    dig 1
-    extract_uint16
-    int 2
-    +
-    +
-    frame_bury 2
-    int 2
-    +
-    frame_bury 1
-    b recalculate_head_for_elements_with_byte_length_head_for_header@1
-
-recalculate_head_for_elements_with_byte_length_head_after_for@4:
-    frame_dig -3
-    frame_bury 0
     retsub
